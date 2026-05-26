@@ -19,9 +19,19 @@ build/
 .vinxi/
 .nitro/
 
+# ── Editor ───────────────────────────────────────────────
+.vscode/
+**/.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
 # ── TanStack / Vite internals ─────────────────────────────
 .tanstack/
-frontend/.tanstack/
+**/.tanstack/
 
 # ── Cloudflare / Wrangler ─────────────────────────────────
 .wrangler/
