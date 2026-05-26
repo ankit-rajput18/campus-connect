@@ -1,10 +1,12 @@
 import { createFileRoute, Link, useLocation } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Plus, Search, SlidersHorizontal, TrendingUp, Flame, Clock, LogIn, X } from "lucide-react";
+import { Plus, Search, SlidersHorizontal, TrendingUp, Flame, Clock, LogIn, X, type LucideIcon } from "lucide-react";
 import { AppShell } from "@/components/AppShell";
 import { PostCard, PostCardSkeleton } from "@/components/PostCard";
-import { categories, type Category } from "@/lib/mock-data";
+import { categories, type Category, type PostStatus } from "@/lib/mock-data";
+
+type SortOption = "recent" | "trending" | "hot";
 import { getPosts, isAuthenticated } from "@/lib/api";
 
 interface FeedPost {
@@ -12,8 +14,8 @@ interface FeedPost {
   title: string;
   description: string;
   image: string;
-  category: string;
-  status: string;
+  category: Category;
+  status: PostStatus;
   avatar: string;
   student: string;
   college: string;
@@ -25,7 +27,7 @@ export const Route = createFileRoute("/dashboard")({
   component: Dashboard,
 });
 
-const sortOptions = [
+const sortOptions: { value: SortOption; label: string; icon: LucideIcon }[] = [
   { value: "recent", label: "Recent", icon: Clock },
   { value: "trending", label: "Trending", icon: TrendingUp },
   { value: "hot", label: "Hot", icon: Flame },
@@ -71,7 +73,7 @@ function Dashboard() {
   const [query, setQuery] = useState(initialSearch);
   const [loading, setLoading] = useState(true);
   const [visible, setVisible] = useState(8);
-  const [sort, setSort] = useState("recent");
+  const [sort, setSort] = useState<SortOption>("recent");
   const [showFilters, setShowFilters] = useState(false);
   const [bannerDismissed, setBannerDismissed] = useState(false);
   const [posts, setPosts] = useState<FeedPost[]>([]);
@@ -103,8 +105,8 @@ function Dashboard() {
           image:
             post.image ||
             "https://images.unsplash.com/photo-1519337265831-281ec6cc8514?auto=format&fit=crop&w=1200&q=80",
-          category: post.category || "Others",
-          status: post.status || "Available",
+          category: (post.category || "Others") as Category,
+          status: (post.status || "Available") as PostStatus,
           avatar:
             post.author?.avatar ||
             `https://api.dicebear.com/6.x/initials/svg?seed=${encodeURIComponent(post.author?.name || post._id)}`,
