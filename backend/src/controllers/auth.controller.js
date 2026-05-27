@@ -19,11 +19,7 @@ const sendTokenResponse = (user, statusCode, res) => {
     name: user.name,
     email: user.email,
     avatar: user.avatar,
-    department: user.department,
-    semester: user.semester,
-    year: user.year,
-    branch: user.branch,
-    college: user.college,
+      backgroundImage: user.backgroundImage,
     onboardingComplete: user.onboardingComplete,
     authProvider: user.authProvider,
     createdAt: user.createdAt,
@@ -141,7 +137,9 @@ export const googleSignIn = async (req, res) => {
         shouldSave = true;
       }
 
-      if (picture && picture !== user.avatar) {
+      // Preserve custom uploaded avatars after the user signs in again.
+      // Only update the avatar from Google if the user has not already saved a manual avatar.
+      if (picture && !user.avatarPublicId && picture !== user.avatar) {
         user.avatar = picture;
         shouldSave = true;
       }

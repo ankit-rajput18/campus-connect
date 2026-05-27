@@ -16,6 +16,7 @@ import {
   MessageSquare,
 } from "lucide-react";
 import { AppShell } from "@/components/AppShell";
+import { UserAvatar } from "@/components/UserAvatar";
 import { categories } from "@/lib/mock-data";
 import { toast } from "sonner";
 import { deletePost, getMyPosts, getPostById, isAuthenticated, updatePost, respondToRequest } from "@/lib/api";
@@ -747,17 +748,12 @@ function MyPosts() {
                           {/* Profile Header */}
                           <div className="flex items-start justify-between gap-3">
                             <div className="flex items-center gap-3">
-                              {r.requester?.avatar ? (
-                                <img
-                                  src={r.requester.avatar}
-                                  alt={r.requester.name}
-                                  className="h-10 w-10 rounded-full object-cover border border-white shadow-sm"
-                                />
-                              ) : (
-                                <div className="bg-gradient-to-tr from-indigo-500 to-purple-500 text-white font-bold h-10 w-10 rounded-full flex items-center justify-center text-sm shadow-sm">
-                                  {initials}
-                                </div>
-                              )}
+                              <UserAvatar
+                                name={r.requester?.name || "Unknown"}
+                                avatar={r.requester?.avatar || ""}
+                                size="sm"
+                                className="h-10 w-10 border border-white shadow-sm"
+                              />
                               <div>
                                 <h4 className="font-semibold text-sm text-slate-900">
                                   {r.requester?.name || "Unknown Student"}

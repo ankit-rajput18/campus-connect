@@ -5,6 +5,7 @@ import type { Post } from "@/lib/mock-data";
 import { useState } from "react";
 import { toast } from "sonner";
 import { sendInterest } from "@/lib/api";
+import { UserAvatar } from "@/components/UserAvatar";
 
 const categoryConfig: Record<string, { color: string; bg: string; dot: string }> = {
   Books: {
@@ -48,13 +49,8 @@ export function PostCard({ post, index = 0, isGuest = false }: { post: Post; ind
   const navigate = useNavigate();
 
   const requireAuth = (action: string) => {
-    toast.error(`Sign in to ${action}`, {
-      description: "Create a free account to connect with campus students.",
-      action: {
-        label: "Sign in",
-        onClick: () => navigate({ to: "/auth" }),
-      },
-    });
+    // Directly navigate to the sign-in page for guests instead of showing a toast.
+    navigate({ to: "/auth" });
   };
 
   return (
@@ -126,10 +122,11 @@ export function PostCard({ post, index = 0, isGuest = false }: { post: Post; ind
 
         {/* Student info */}
         <div className="mt-3 flex items-center gap-2">
-          <img
-            src={post.avatar}
-            alt={post.student}
-            className="h-7 w-7 rounded-full ring-2 ring-white shadow-sm object-cover"
+          <UserAvatar
+            name={post.student}
+            avatar={post.avatar || ""}
+            size="sm"
+            className="h-7 w-7 ring-2 ring-white shadow-sm"
           />
           <div className="flex-1 min-w-0">
             <div className="text-xs font-semibold truncate">{post.student}</div>

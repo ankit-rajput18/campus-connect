@@ -19,19 +19,11 @@ function AuthPage() {
   const [loading, setLoading] = useState(false);
   const [showOnboarding, setShowOnboarding] = useState(false);
 
-  // Log API URL and host info on mount
-  useEffect(() => {
-    console.log("🌐 Host:", window.location.hostname);
-    console.log("📱 Device:", /Android|iPhone|iPad|iPod/i.test(navigator.userAgent) ? "Mobile" : "Desktop");
-  }, []);
-
   const handleGoogle = async () => {
     setLoading(true);
 
     try {
-      console.log("🔵 Starting Google sign-in...");
       const idToken = await signInWithGoogle();
-      console.log("🟢 Got idToken:", idToken ? "✅ Yes" : "❌ No");
 
       if (!idToken) {
         console.error("❌ No idToken returned from Firebase");
@@ -40,9 +32,7 @@ function AuthPage() {
         return;
       }
 
-      console.log("🔄 Sending token to backend...");
       const response = await googleSignIn({ idToken });
-      console.log("🟡 Backend response:", response);
 
       if (response.error) {
         console.error("❌ Backend error:", response.error);

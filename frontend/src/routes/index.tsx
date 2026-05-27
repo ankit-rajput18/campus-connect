@@ -394,49 +394,7 @@ function Landing() {
         </div>
       </section>
 
-      {/* ── About / CTA ── */}
-      <section id="about" className="px-4 pt-24">
-        <div className="mx-auto max-w-5xl">
-          <FadeIn>
-            <div className="relative glass-card rounded-[2.5rem] p-10 md:p-16 shadow-float text-center overflow-hidden border border-white/70">
-              {/* Gradient bg */}
-              <div className="absolute inset-0 -z-10 gradient-bg opacity-[0.07]" />
-              <div className="absolute -top-20 -right-20 h-64 w-64 rounded-full bg-violet-400/20 blur-3xl -z-10" />
-              <div className="absolute -bottom-20 -left-20 h-64 w-64 rounded-full bg-indigo-400/20 blur-3xl -z-10" />
-
-              <div className="inline-flex items-center gap-2 glass rounded-full px-4 py-1.5 text-xs font-semibold mb-6">
-                <Shield className="h-3.5 w-3.5 text-indigo-600" />
-                Verified campus-only network
-              </div>
-
-              <h2 className="font-display text-3xl md:text-5xl font-bold leading-tight">
-                Built by students.
-                <br />
-                <span className="gradient-text">For your campus.</span>
-              </h2>
-              <p className="mt-5 text-muted-foreground max-w-2xl mx-auto text-base leading-relaxed">
-                Campus Connect is the DYP DPU community marketplace — a private, verified
-                network where every exchange happens between real classmates.
-              </p>
-              <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-3">
-                <Link
-                  to="/auth"
-                  className="inline-flex items-center gap-2 gradient-bg text-white font-semibold rounded-[16px] px-8 py-4 shadow-soft hover:shadow-glow transition-all duration-200"
-                >
-                  Join Campus Connect
-                  <ArrowRight className="h-4 w-4" />
-                </Link>
-                <Link
-                  to="/dashboard"
-                  className="inline-flex items-center gap-2 glass-strong rounded-[16px] px-8 py-4 font-semibold text-sm hover:shadow-soft transition-all duration-200"
-                >
-                  Browse Feed
-                </Link>
-              </div>
-            </div>
-          </FadeIn>
-        </div>
-      </section>
+     
 
       <Footer />
     </div>

@@ -20,16 +20,40 @@ export const onboardUser = async (req, res) => {
       onboardingComplete: true,
     };
 
+    // Multer may populate `req.files` as an object (fields) or as an array (upload.any()).
+    // Normalize to `avatarFile` and `backgroundFile` variables.
+    let avatarFile = null;
+    let backgroundFile = null;
+    if (Array.isArray(req.files)) {
+      for (const f of req.files) {
+        if (f.fieldname === "avatar") avatarFile = f;
+        if (f.fieldname === "backgroundImage") backgroundFile = f;
+      }
+    } else {
+      avatarFile = req.file || (req.files?.avatar && req.files.avatar[0]);
+      backgroundFile = req.files?.backgroundImage?.[0];
+    }
+
     // Handle avatar upload if a file was sent
-    if (req.file) {
-      // Delete old avatar from Cloudinary if it exists
+    if (avatarFile) {
       if (req.user.avatarPublicId) {
         await deleteFromCloudinary(req.user.avatarPublicId);
       }
-      const result = await uploadToCloudinary(req.file.buffer, "avatars");
+      const result = await uploadToCloudinary(avatarFile.buffer, "avatars");
       console.log("Avatar upload result:", result && result.public_id ? result.public_id : result);
       updateData.avatar = result.secure_url;
       updateData.avatarPublicId = result.public_id;
+    }
+
+    // Handle banner/background upload if a file was sent
+    if (backgroundFile) {
+      if (req.user.backgroundImagePublicId) {
+        await deleteFromCloudinary(req.user.backgroundImagePublicId);
+      }
+      const result = await uploadToCloudinary(backgroundFile.buffer, "backgrounds");
+      console.log("Background upload result:", result && result.public_id ? result.public_id : result);
+      updateData.backgroundImage = result.secure_url;
+      updateData.backgroundImagePublicId = result.public_id;
     }
 
     const user = await User.findByIdAndUpdate(req.user._id, updateData, {
@@ -55,7 +79,7 @@ export const onboardUser = async (req, res) => {
 // ── GET /api/users/:id ────────────────────────────────────────────────────────
 export const getUserById = async (req, res) => {
   try {
-    const user = await User.findById(req.params.id).select("-password -firebaseUid -avatarPublicId");
+    const user = await User.findById(req.params.id).select("-password -firebaseUid -avatarPublicId -backgroundImagePublicId");
     if (!user) {
       return res.status(404).json({ message: "User not found" });
     }
@@ -84,21 +108,46 @@ export const updateProfile = async (req, res) => {
     if (department !== undefined) updateData.department = department;
     if (semester !== undefined) updateData.semester = semester;
 
+    // Multer may populate `req.files` as an object (fields) or as an array (upload.any()).
+    // Normalize to `avatarFile` and `backgroundFile` variables.
+    let avatarFile = null;
+    let backgroundFile = null;
+    if (Array.isArray(req.files)) {
+      for (const f of req.files) {
+        if (f.fieldname === "avatar") avatarFile = f;
+        if (f.fieldname === "backgroundImage") backgroundFile = f;
+      }
+    } else {
+      avatarFile = req.file || (req.files?.avatar && req.files.avatar[0]);
+      backgroundFile = req.files?.backgroundImage?.[0];
+    }
+
     // Handle avatar upload
-    if (req.file) {
+    if (avatarFile) {
       if (req.user.avatarPublicId) {
         await deleteFromCloudinary(req.user.avatarPublicId);
       }
-      const result = await uploadToCloudinary(req.file.buffer, "avatars");
+      const result = await uploadToCloudinary(avatarFile.buffer, "avatars");
       console.log("Avatar upload result:", result && result.public_id ? result.public_id : result);
       updateData.avatar = result.secure_url;
       updateData.avatarPublicId = result.public_id;
     }
 
+    // Handle background/banner upload
+    if (backgroundFile) {
+      if (req.user.backgroundImagePublicId) {
+        await deleteFromCloudinary(req.user.backgroundImagePublicId);
+      }
+      const result = await uploadToCloudinary(backgroundFile.buffer, "backgrounds");
+      console.log("Background upload result:", result && result.public_id ? result.public_id : result);
+      updateData.backgroundImage = result.secure_url;
+      updateData.backgroundImagePublicId = result.public_id;
+    }
+
     const user = await User.findByIdAndUpdate(req.user._id, updateData, {
       new: true,
       runValidators: true,
-    }).select("-password -firebaseUid -avatarPublicId");
+    }).select("-password -firebaseUid -avatarPublicId -backgroundImagePublicId");
 
     // Notify connected clients about the updated user so UI can refresh in real-time
     try {
@@ -119,7 +168,7 @@ export const updateProfile = async (req, res) => {
 // Get the currently logged-in user's full profile + stats.
 export const getMyProfile = async (req, res) => {
   try {
-    const user = await User.findById(req.user._id).select("-password -firebaseUid -avatarPublicId");
+    const user = await User.findById(req.user._id).select("-password -firebaseUid -avatarPublicId -backgroundImagePublicId");
 
     const [totalPosts, totalExchanges, totalViews, bookPosts, recentPosts] = await Promise.all([
       Post.countDocuments({ author: req.user._id }),

@@ -20,20 +20,15 @@ function getApiBaseUrl(): string {
     host !== "localhost" &&
     host !== "127.0.0.1"
   ) {
-    const url = `${protocol}//${host}:5000/api`;
-    console.log(`📡 Overriding VITE_API_URL localhost for remote host -> ${url}`);
-    return url;
+    return `${protocol}//${host}:5000/api`;
   }
 
   if (envUrl) {
-    console.log(`📡 API URL from env -> ${envUrl}`);
     return envUrl;
   }
 
   if (isBrowser) {
-    const url = `${protocol}//${host}:5000/api`;
-    console.log(`📡 API URL from host -> ${url}`);
-    return url;
+    return `${protocol}//${host}:5000/api`;
   }
 
   return "http://localhost:5000/api";
@@ -97,7 +92,6 @@ async function apiRequest<T = any>(
   }
 
   try {
-    console.log(`🔄 ${method} ${url}`);
     const response = await fetch(url, {
       method,
       headers: finalHeaders,
@@ -115,7 +109,6 @@ async function apiRequest<T = any>(
       };
     }
 
-    console.log(`✅ API Success (${response.status})`);
     return {
       status: response.status,
       data: data as T,
@@ -266,8 +259,10 @@ interface UserProfile {
   name: string;
   email: string;
   avatar: string;
+  backgroundImage: string;
   department: string;
   semester: string;
+  bio: string;
   year: string;
   branch: string;
   college: string;
@@ -287,6 +282,7 @@ interface OnboardUserRequest {
   department: string;
   semester: string;
   avatar?: File;
+  backgroundImage?: File;
 }
 
 export async function onboardUser(
@@ -298,6 +294,9 @@ export async function onboardUser(
   formData.append("semester", payload.semester);
   if (payload.avatar) {
     formData.append("avatar", payload.avatar);
+  }
+  if (payload.backgroundImage) {
+    formData.append("backgroundImage", payload.backgroundImage);
   }
 
   return apiRequestWithFile<{ user: UserProfile }>(
@@ -315,6 +314,7 @@ interface UpdateProfileRequest {
   department?: string;
   semester?: string;
   avatar?: File;
+  backgroundImage?: File;
 }
 
 export async function updateProfile(
@@ -328,6 +328,7 @@ export async function updateProfile(
   if (payload.department) formData.append("department", payload.department);
   if (payload.semester) formData.append("semester", payload.semester);
   if (payload.avatar) formData.append("avatar", payload.avatar);
+  if (payload.backgroundImage) formData.append("backgroundImage", payload.backgroundImage);
 
   return apiRequestWithFile<{ user: UserProfile }>(
     "/users/profile",

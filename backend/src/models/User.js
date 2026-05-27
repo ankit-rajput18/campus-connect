@@ -45,6 +45,14 @@ const userSchema = new mongoose.Schema(
       type: String, // Cloudinary public_id for deletion/replacement
       default: "",
     },
+    backgroundImage: {
+      type: String, // Cloudinary URL for profile banner
+      default: "",
+    },
+    backgroundImagePublicId: {
+      type: String, // Cloudinary public_id for deletion/replacement
+      default: "",
+    },
     bio: {
       type: String,
       maxlength: [300, "Bio cannot exceed 300 characters"],

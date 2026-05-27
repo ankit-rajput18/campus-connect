@@ -15,9 +15,10 @@ import {
 } from "lucide-react";
 import { useEffect, useRef, useState, ChangeEvent } from "react";
 import { AppShell } from "@/components/AppShell";
+import { UserAvatar } from "@/components/UserAvatar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
-import { getMyProfile, updateProfile, notifyUserUpdated } from "@/lib/api";
+import { getMyProfile, updateProfile } from "@/lib/api";
 
 export const Route = createFileRoute("/profile")({
   head: () => ({ meta: [{ title: "Profile — Campus Connect" }] }),
@@ -87,8 +88,6 @@ function ProfilePage() {
       setProfile(response.data.user);
       setAvatarPreview(response.data.user.avatar || "");
       setAvatarFile(null);
-      // Update navbar avatar immediately + cache for refresh
-      notifyUserUpdated(response.data.user);
       setForm({
         name: response.data.user.name || "",
         bio: response.data.user.bio || "",
@@ -110,35 +109,15 @@ function ProfilePage() {
     }
   };
 
-  const handleAvatarChange = async (event: ChangeEvent<HTMLInputElement>) => {
+  const handleAvatarChange = (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) return;
-
     setAvatarFile(file);
     const reader = new FileReader();
     reader.onload = () => {
       setAvatarPreview(reader.result as string);
     };
     reader.readAsDataURL(file);
-
-    setSaving(true);
-    const response = await updateProfile({ avatar: file });
-    setSaving(false);
-
-    if (response.error) {
-      toast.error(response.error);
-      return;
-    }
-
-    if (response.data?.user) {
-      setProfile(response.data.user);
-      setAvatarPreview(response.data.user.avatar || "");
-      setAvatarFile(null);
-      notifyUserUpdated(response.data.user);
-      toast.success("Profile photo saved!", {
-        description: "Your profile photo was updated successfully.",
-      });
-    }
   };
 
   if (loading) {
@@ -272,10 +251,11 @@ function ProfilePage() {
             <div className="flex flex-col sm:flex-row items-start sm:items-end gap-4 -mt-12 sm:-mt-14">
               {/* Avatar */}
               <div className="relative shrink-0">
-                <img
-                  src={avatarPreview || profile?.avatar || "https://i.pravatar.cc/200?img=12"}
-                  alt="Profile"
-                  className="h-24 w-24 sm:h-28 sm:w-28 rounded-4xl ring-4 ring-white shadow-glow object-cover"
+                <UserAvatar
+                  name={form.name || profile?.name || "Campus Student"}
+                  avatar={avatarPreview || profile?.avatar || ""}
+                  size="3xl"
+                  className="ring-4 ring-white shadow-glow"
                 />
                 <button
                   type="button"
@@ -342,30 +322,89 @@ function ProfilePage() {
                 </TabsList>
 
                 <TabsContent value="overview">
-                  <div className="space-y-5 mt-5">
-                    <div>
-                      <div className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-2">
-                        Bio
+                  <div className="space-y-4 mt-5">
+
+                    {/* ── Profile details — iOS Settings style ── */}
+                    <div className="rounded-[20px] border border-white/70 bg-white/30 overflow-hidden">
+
+                      {/* Email */}
+                      <button
+                        type="button"
+                        onClick={() => setActiveTab("edit")}
+                        className="w-full flex items-center gap-3 px-4 py-3.5 hover:bg-white/40 active:bg-white/50 transition border-b border-white/40 text-left"
+                      >
+                        <div className="h-8 w-8 rounded-xl bg-blue-50 border border-blue-100 grid place-items-center shrink-0">
+                          <Mail className="h-3.5 w-3.5 text-blue-500" />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Email</div>
+                          <div className="text-sm font-medium text-foreground truncate mt-0.5">
+                            {profile?.email || "Not set"}
+                          </div>
+                        </div>
+                      </button>
+
+                      {/* College */}
+                      <button
+                        type="button"
+                        onClick={() => setActiveTab("edit")}
+                        className="w-full flex items-center gap-3 px-4 py-3.5 hover:bg-white/40 active:bg-white/50 transition border-b border-white/40 text-left"
+                      >
+                        <div className="h-8 w-8 rounded-xl bg-violet-50 border border-violet-100 grid place-items-center shrink-0">
+                          <MapPin className="h-3.5 w-3.5 text-violet-500" />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">College</div>
+                          <div className="text-sm font-medium text-foreground leading-snug mt-0.5">
+                            {profile?.college || "Not set"}
+                          </div>
+                        </div>
+                      </button>
+
+                      {/* Year + Branch side by side */}
+                      <div className="grid grid-cols-2">
+                        <button
+                          type="button"
+                          onClick={() => setActiveTab("edit")}
+                          className="flex items-center gap-3 px-4 py-3.5 hover:bg-white/40 active:bg-white/50 transition border-r border-white/40 text-left"
+                        >
+                          <div className="h-8 w-8 rounded-xl bg-amber-50 border border-amber-100 grid place-items-center shrink-0">
+                            <Calendar className="h-3.5 w-3.5 text-amber-500" />
+                          </div>
+                          <div className="min-w-0">
+                            <div className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Year</div>
+                            <div className="text-sm font-medium text-foreground truncate mt-0.5">
+                              {profile?.year || "Not set"}
+                            </div>
+                          </div>
+                        </button>
+
+                        <button
+                          type="button"
+                          onClick={() => setActiveTab("edit")}
+                          className="flex items-center gap-3 px-4 py-3.5 hover:bg-white/40 active:bg-white/50 transition text-left"
+                        >
+                          <div className="h-8 w-8 rounded-xl bg-emerald-50 border border-emerald-100 grid place-items-center shrink-0">
+                            <TrendingUp className="h-3.5 w-3.5 text-emerald-500" />
+                          </div>
+                          <div className="min-w-0">
+                            <div className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Branch</div>
+                            <div className="text-sm font-medium text-foreground truncate mt-0.5">
+                              {profile?.branch || "Not set"}
+                            </div>
+                          </div>
+                        </button>
                       </div>
+                    </div>
+
+                    {/* ── Bio ── */}
+                    <div className="rounded-[20px] border border-white/70 bg-white/30 px-4 py-4">
+                      <div className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground mb-2">Bio</div>
                       <p className="text-sm text-foreground/80 leading-relaxed">
                         {profile?.bio || "No bio yet. Add a short introduction to help others connect."}
                       </p>
                     </div>
 
-                    <div className="grid gap-3 sm:grid-cols-2">
-                      <div className="rounded-4xl border border-white/70 bg-white/5 p-4">
-                        <div className="text-xs uppercase tracking-[0.24em] text-muted-foreground mb-2">
-                          Current Year
-                        </div>
-                        <div className="font-semibold">{profile?.year || "Not set"}</div>
-                      </div>
-                      <div className="rounded-4xl border border-white/70 bg-white/5 p-4">
-                        <div className="text-xs uppercase tracking-[0.24em] text-muted-foreground mb-2">
-                          Current Branch
-                        </div>
-                        <div className="font-semibold">{profile?.branch || "Not set"}</div>
-                      </div>
-                    </div>
                   </div>
                 </TabsContent>
 

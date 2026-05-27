@@ -3,7 +3,7 @@ import { motion } from "framer-motion";
 import { MapPin, Users, ArrowRight, BadgeCheck, Sparkles } from "lucide-react";
 import { colleges } from "@/lib/mock-data";
 import { Logo } from "@/components/Logo";
-import { DypDpuLogo } from "@/components/DypDpuLogo";
+import dypDpuLogo from "@/assets/dyp-dpu-logo.jpeg";
 
 export const Route = createFileRoute("/colleges")({
   head: () => ({ meta: [{ title: "Choose your college — Campus Connect" }] }),
@@ -79,8 +79,14 @@ function CollegesPage() {
             {/* Top row: logo + badge */}
             <div className="flex items-start justify-between gap-4">
               {/* Logo on white pill */}
-              <div className="bg-white rounded-[16px] px-5 py-3 shadow-soft inline-flex items-center justify-center">
-                <DypDpuLogo size={40} />
+              <div className="bg-white rounded-[16px] px-4 py-3 shadow-soft inline-flex items-center justify-center">
+                <img
+                  src={dypDpuLogo}
+                  alt="DYP DPU logo"
+                  className="h-16 w-16 object-contain"
+                  width={70}
+                  height={70}
+                />
               </div>
 
               {/* Verified badge */}

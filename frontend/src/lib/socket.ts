@@ -12,7 +12,6 @@ export function connectSocket(): Socket | null {
 
   const token = localStorage.getItem("authToken");
   if (!token) {
-    console.warn("🔌 Socket connect skipped: No auth token found");
     return null;
   }
 
@@ -24,11 +23,11 @@ export function connectSocket(): Socket | null {
   });
 
   socket.on("connect", () => {
-    console.log("🔌 Real-time chat connected (Socket ID:", socket?.id, ")");
+    // Connection established
   });
 
-  socket.on("disconnect", (reason) => {
-    console.log("🔌 Real-time chat disconnected (Reason:", reason, ")");
+  socket.on("disconnect", () => {
+    // Disconnected from server
   });
 
   socket.on("error", (err: any) => {
@@ -41,10 +40,9 @@ export function connectSocket(): Socket | null {
       if (data?.user) {
         localStorage.setItem("cachedUser", JSON.stringify(data.user));
         window.dispatchEvent(new CustomEvent("user-updated", { detail: data.user }));
-        console.log("🔔 Received user_updated for", data.user._id);
       }
     } catch (e) {
-      console.warn("Failed to handle user_updated socket event:", e);
+      console.error("Failed to handle user_updated socket event:", e);
     }
   });
 
@@ -58,7 +56,6 @@ export function disconnectSocket(): void {
   if (socket) {
     socket.disconnect();
     socket = null;
-    console.log("🔌 Socket connection closed manually");
   }
 }
 

@@ -20,6 +20,7 @@ import {
 import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Logo } from "./Logo";
+import { UserAvatar } from "./UserAvatar";
 import { getMe, handleLogout, isAuthenticated, getNotifications, respondToRequest, getCachedUser, setCachedUser, notifyUserUpdated } from "@/lib/api";
 import { connectSocket } from "@/lib/socket";
 import type { Notification } from "@/lib/api";
@@ -124,10 +125,8 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   // Close menu on route change
   useEffect(() => { setMenu(false); }, [loc.pathname]);
 
-  // Derived avatar — use Cloudinary URL if set, else generate initials avatar
-  const avatarSrc = user?.avatar && user.avatar.trim() !== ""
-    ? user.avatar
-    : `https://ui-avatars.com/api/?name=${encodeURIComponent(user?.name || "U")}&background=0078FF&color=fff&rounded=true`;
+  // Derived avatar — use Cloudinary URL if set, else initials (handled by UserAvatar)
+  const userName = user?.name || "U";
 
   return (
     <div className="min-h-screen pb-28 md:pb-12">
@@ -247,10 +246,11 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                               >
                                 {/* Requester info */}
                                 <div className="flex items-start gap-2.5">
-                                  <img
-                                    src={notif.requester?.avatar || "https://i.pravatar.cc/100?img=10"}
-                                    alt={notif.requester?.name}
-                                    className="h-8 w-8 rounded-full object-cover ring-2 ring-white shrink-0"
+                                  <UserAvatar
+                                    name={notif.requester?.name || "Someone"}
+                                    avatar={notif.requester?.avatar || ""}
+                                    size="sm"
+                                    className="rounded-full"
                                   />
                                   <div className="flex-1 min-w-0">
                                     <div className="flex items-center gap-1.5 flex-wrap">
@@ -374,11 +374,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                 onClick={() => setMenu((v) => !v)}
                 className="flex items-center gap-2 rounded-xl bg-white/60 dark:bg-white/8 hover:bg-white dark:hover:bg-white/12 px-2 py-1.5 transition border border-white/50 dark:border-white/10"
               >
-                <img
-                  src={avatarSrc}
-                  className="h-7 w-7 rounded-lg object-cover"
-                  alt="avatar"
-                />
+                <UserAvatar name={userName} avatar={user?.avatar} size="sm" className="rounded-lg" />
                 <span className="hidden sm:block text-sm font-semibold pr-0.5">
                   {user?.name ? user.name.split(" ")[0] : "You"}
                 </span>
@@ -405,11 +401,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                       {/* User info */}
                       <div className="px-3 py-2.5 mb-1">
                         <div className="flex items-center gap-2.5">
-                          <img
-                            src={avatarSrc}
-                            className="h-9 w-9 rounded-xl object-cover"
-                            alt="avatar"
-                          />
+                          <UserAvatar name={userName} avatar={user?.avatar} size="md" className="rounded-xl" />
                           <div>
                             <div className="text-sm font-semibold">{user?.name || "Campus Student"}</div>
                             <div className="text-[11px] text-muted-foreground">

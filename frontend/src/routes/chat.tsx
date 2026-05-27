@@ -28,6 +28,7 @@ import {
   offMessagesRead,
 } from "@/lib/socket";
 import { toast } from "sonner";
+import { UserAvatar } from "@/components/UserAvatar";
 
 export const Route = createFileRoute("/chat")({
   head: () => ({ meta: [{ title: "Messages — Campus Connect" }] }),
@@ -81,6 +82,8 @@ function ChatPage() {
   const [input, setInput] = useState("");
   const [search, setSearch] = useState("");
   const [myId, setMyId] = useState<string>("");
+  const [myName, setMyName] = useState<string>("");
+  const [myAvatar, setMyAvatar] = useState<string>("");
   const [loadingThreads, setLoadingThreads] = useState(true);
   const [loadingMessages, setLoadingMessages] = useState(false);
 
@@ -101,6 +104,8 @@ function ChatPage() {
       const meRes = await getMe();
       if (meRes.data?.user) {
         setMyId(meRes.data.user._id);
+        setMyName(meRes.data.user.name || "You");
+        setMyAvatar(meRes.data.user.avatar || "");
       }
 
       // Fetch active threads
@@ -128,6 +133,11 @@ function ChatPage() {
   useEffect(() => {
     const handleNewMessage = (data: { message: ChatMessage }) => {
       const { message } = data;
+
+      // If this is our own message, ensure avatar is set
+      if (message.sender._id === myId && myAvatar && !message.sender.avatar) {
+        message.sender.avatar = myAvatar;
+      }
 
       // Check if message belongs to active thread
       if (message.chat === activeId) {
@@ -199,7 +209,22 @@ function ChatPage() {
       offNewMessage(handleNewMessage);
       offMessagesRead(handleMessagesRead);
     };
-  }, [activeId, myId]);
+  }, [activeId, myId, myAvatar]);
+
+  // 2.5 Listen for user profile updates to sync avatar
+  useEffect(() => {
+    const handleUserUpdated = (event: any) => {
+      const updatedUser = event.detail;
+      if (updatedUser?.avatar) {
+        setMyAvatar(updatedUser.avatar);
+      }
+    };
+
+    window.addEventListener("user-updated", handleUserUpdated);
+    return () => {
+      window.removeEventListener("user-updated", handleUserUpdated);
+    };
+  }, []);
 
   // 3. Handle URL parameters (creating/opening thread from "Chat" button)
   useEffect(() => {
@@ -278,7 +303,7 @@ function ChatPage() {
     const optimisticMsg: ChatMessage = {
       _id: `optimistic_${Date.now()}`,
       chat: activeId,
-      sender: { _id: myId, name: "You", avatar: "" },
+      sender: { _id: myId, name: myName || "You", avatar: myAvatar },
       text,
       read: false,
       createdAt: new Date().toISOString(),
@@ -369,11 +394,7 @@ function ChatPage() {
                   >
                     {/* Avatar */}
                     <div className="relative shrink-0">
-                      <img
-                        src={other.avatar || `https://i.pravatar.cc/100?img=${other.name.charCodeAt(0) % 70}`}
-                        alt={other.name}
-                        className="h-11 w-11 rounded-full object-cover ring-2 ring-white shadow-sm"
-                      />
+                      <UserAvatar name={other.name} avatar={other.avatar} size="lg" />
                     </div>
                     {/* Info */}
                     <div className="flex-1 min-w-0">
@@ -423,11 +444,7 @@ function ChatPage() {
                       <ArrowLeft className="h-4 w-4" />
                     </button>
                     <div className="relative">
-                      <img
-                        src={other.avatar || `https://i.pravatar.cc/100?img=${other.name.charCodeAt(0) % 70}`}
-                        alt={other.name}
-                        className="h-10 w-10 rounded-full object-cover ring-2 ring-white shadow-sm"
-                      />
+                      <UserAvatar name={other.name} avatar={other.avatar} size="md" />
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="font-semibold text-sm">{other.name}</div>
@@ -462,13 +479,14 @@ function ChatPage() {
                 ) : (
                   <AnimatePresence initial={false}>
                     {messages.map((msg, i) => {
-                      const isMe = msg.sender._id === myId || msg.sender === myId;
+                      const isMe = msg.sender._id === myId;
                       const other = active.otherUser || active.participants.find((p) => p._id !== myId);
                       const showAvatar =
                         !isMe &&
-                        (i === 0 ||
-                          messages[i - 1].sender._id === myId ||
-                          messages[i - 1].sender === myId);
+                        (i === 0 || messages[i - 1].sender._id === myId);
+                      const showMyAvatar =
+                        isMe &&
+                        (i === 0 || messages[i - 1].sender._id !== myId);
 
                       return (
                         <motion.div
@@ -482,10 +500,24 @@ function ChatPage() {
                           {!isMe && other && (
                             <div className="w-7 shrink-0">
                               {showAvatar && (
-                                <img
-                                  src={other.avatar || `https://i.pravatar.cc/100?img=${other.name.charCodeAt(0) % 70}`}
-                                  alt={other.name}
-                                  className="h-7 w-7 rounded-full object-cover ring-1 ring-white"
+                                <UserAvatar
+                                  name={other.name}
+                                  avatar={other.avatar || ""}
+                                  size="sm"
+                                  className="ring-1 ring-white"
+                                />
+                              )}
+                            </div>
+                          )}
+                          {/* Current user avatar */}
+                          {isMe && (
+                            <div className="w-7 shrink-0 order-last">
+                              {showMyAvatar && (
+                                <UserAvatar
+                                  name={myName}
+                                  avatar={myAvatar || ""}
+                                  size="sm"
+                                  className="ring-1 ring-white"
                                 />
                               )}
                             </div>
