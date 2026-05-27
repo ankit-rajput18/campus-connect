@@ -143,7 +143,8 @@ function RootShell({ children }: { children: React.ReactNode }) {
 function PWAInstallPopup() {
   const [show, setShow] = useState(false);
   const [isIOS, setIsIOS] = useState(false);
-  const [promptReady, setPromptReady] = useState(false);
+  const [isAndroid, setIsAndroid] = useState(false);
+  const [hasNativePrompt, setHasNativePrompt] = useState(false);
   const promptRef = useRef<any>(null);
 
   useEffect(() => {
@@ -153,33 +154,34 @@ function PWAInstallPopup() {
       (window.navigator as any).standalone === true;
     if (isStandalone) return;
 
-    // Show once per session (sessionStorage resets on tab close)
+    // Show once per session
     if (sessionStorage.getItem("pwa-shown") === "1") return;
 
-    const ios = /iPhone|iPad|iPod/i.test(navigator.userAgent) && !(window as any).MSStream;
-    setIsIOS(ios);
+    const ua = navigator.userAgent;
+    const ios = /iPhone|iPad|iPod/i.test(ua) && !(window as any).MSStream;
+    const android = /Android/i.test(ua);
 
-    // If the global prompt was already captured before this component mounted
+    setIsIOS(ios);
+    setIsAndroid(android);
+
+    // If native prompt already captured
     if (_deferredPrompt) {
       promptRef.current = _deferredPrompt;
-      setPromptReady(true);
+      setHasNativePrompt(true);
     }
 
-    // Listen for prompt becoming available
+    // Listen for native prompt
     const onPromptReady = () => {
       promptRef.current = _deferredPrompt;
-      setPromptReady(true);
+      setHasNativePrompt(true);
     };
     window.addEventListener("pwa-prompt-ready", onPromptReady);
 
-    // Show popup after 1.5s — enough time for the page to render
+    // Show popup after 2s on ALL devices
     const timer = setTimeout(() => {
-      // On Android/Chrome: only show if we have the prompt OR it's iOS
-      if (_deferredPrompt || ios) {
-        setShow(true);
-        sessionStorage.setItem("pwa-shown", "1");
-      }
-    }, 1500);
+      setShow(true);
+      sessionStorage.setItem("pwa-shown", "1");
+    }, 2000);
 
     return () => {
       clearTimeout(timer);
@@ -200,9 +202,10 @@ function PWAInstallPopup() {
     setShow(false);
   };
 
-  const handleDismiss = () => {
-    setShow(false);
-  };
+  const handleDismiss = () => setShow(false);
+
+  // Android without native prompt = HTTP/local — show manual Chrome instructions
+  const showAndroidManual = isAndroid && !hasNativePrompt;
 
   return (
     <AnimatePresence>
@@ -237,7 +240,6 @@ function PWAInstallPopup() {
                 >
                   <X className="h-3.5 w-3.5 text-white" />
                 </button>
-
                 <div className="flex items-center gap-4">
                   <img
                     src="/icons/icon-192.png"
@@ -245,12 +247,8 @@ function PWAInstallPopup() {
                     className="h-16 w-16 rounded-[18px] shadow-lg shrink-0 bg-white"
                   />
                   <div className="text-white">
-                    <div className="font-display font-bold text-xl leading-tight">
-                      Campus Connect
-                    </div>
-                    <div className="text-white/80 text-xs mt-0.5">
-                      DYP DPU · Pimpri, Pune
-                    </div>
+                    <div className="font-display font-bold text-xl leading-tight">Campus Connect</div>
+                    <div className="text-white/80 text-xs mt-0.5">DYP DPU · Pimpri, Pune</div>
                   </div>
                 </div>
               </div>
@@ -261,15 +259,13 @@ function PWAInstallPopup() {
                   {isIOS ? "Add to Home Screen" : "Install the App"}
                 </p>
                 <p className="text-sm text-muted-foreground mb-4">
-                  {isIOS
-                    ? "Get quick access from your home screen — no App Store needed."
-                    : "Install Campus Connect for a faster, app-like experience on your device."}
+                  Get quick access from your home screen — no App Store needed.
                 </p>
 
                 {/* Feature list */}
                 <div className="space-y-2 mb-5">
                   {[
-                    { icon: "⚡", text: "Faster — loads instantly like a native app" },
+                    { icon: "⚡", text: "Loads instantly like a native app" },
                     { icon: "📴", text: "Works offline — browse without internet" },
                     { icon: "🏠", text: "Home screen icon — one tap to open" },
                   ].map((f) => (
@@ -280,24 +276,75 @@ function PWAInstallPopup() {
                   ))}
                 </div>
 
-                {/* iOS: step-by-step instructions */}
-                {isIOS ? (
+                {/* iOS Safari instructions */}
+                {isIOS && (
                   <div className="rounded-2xl bg-blue-50 border border-blue-100 p-4 text-sm text-blue-800 space-y-2">
-                    <div className="flex items-center gap-2">
-                      <span className="font-bold text-blue-600">1.</span>
-                      <span>Tap the <Share className="inline h-4 w-4 mb-0.5" /> <strong>Share</strong> button in Safari</span>
+                    <div className="flex items-start gap-2">
+                      <span className="font-bold text-blue-600 shrink-0">1.</span>
+                      <span>Tap the <Share className="inline h-4 w-4 mb-0.5" /> <strong>Share</strong> button at the bottom of Safari</span>
                     </div>
-                    <div className="flex items-center gap-2">
-                      <span className="font-bold text-blue-600">2.</span>
-                      <span>Scroll down and tap <strong>Add to Home Screen</strong></span>
+                    <div className="flex items-start gap-2">
+                      <span className="font-bold text-blue-600 shrink-0">2.</span>
+                      <span>Scroll and tap <strong>Add to Home Screen</strong></span>
                     </div>
-                    <div className="flex items-center gap-2">
-                      <span className="font-bold text-blue-600">3.</span>
+                    <div className="flex items-start gap-2">
+                      <span className="font-bold text-blue-600 shrink-0">3.</span>
                       <span>Tap <strong>Add</strong> — done!</span>
                     </div>
                   </div>
-                ) : (
-                  /* Android/Chrome: native install button */
+                )}
+
+                {/* Android on HTTP — manual Chrome instructions with share button */}
+                {showAndroidManual && (
+                  <div className="space-y-3">
+                    <div className="rounded-2xl bg-blue-50 border border-blue-100 p-4 text-sm text-blue-800 space-y-2">
+                      <div className="flex items-start gap-2">
+                        <span className="font-bold text-blue-600 shrink-0">1.</span>
+                        <span>Tap the <strong>⋮ menu</strong> (3 dots) in Chrome top-right</span>
+                      </div>
+                      <div className="flex items-start gap-2">
+                        <span className="font-bold text-blue-600 shrink-0">2.</span>
+                        <span>Tap <strong>Add to Home screen</strong></span>
+                      </div>
+                      <div className="flex items-start gap-2">
+                        <span className="font-bold text-blue-600 shrink-0">3.</span>
+                        <span>Tap <strong>Add</strong> — done!</span>
+                      </div>
+                    </div>
+                    <div className="flex gap-2">
+                      <button
+                        onClick={handleDismiss}
+                        className="flex-1 py-3 rounded-[14px] text-sm font-semibold border border-gray-200 bg-gray-50 hover:bg-gray-100 text-gray-600 transition"
+                      >
+                        Not now
+                      </button>
+                      <button
+                        onClick={async () => {
+                          // Try Web Share API to open native share sheet
+                          // which includes "Add to Home Screen" option
+                          if (navigator.share) {
+                            try {
+                              await navigator.share({
+                                title: "Campus Connect",
+                                text: "Install Campus Connect — DYP DPU student exchange platform",
+                                url: window.location.origin,
+                              });
+                            } catch {
+                              // User cancelled or share failed — that's fine
+                            }
+                          }
+                        }}
+                        className="flex-[2] inline-flex items-center justify-center gap-2 gradient-bg text-white text-sm font-bold rounded-[14px] py-3 shadow-soft hover:shadow-glow transition"
+                      >
+                        <Smartphone className="h-4 w-4" />
+                        Share / Install
+                      </button>
+                    </div>
+                  </div>
+                )}
+
+                {/* Android with native prompt — one-tap install */}
+                {isAndroid && hasNativePrompt && (
                   <div className="flex gap-2">
                     <button
                       onClick={handleDismiss}
@@ -313,6 +360,50 @@ function PWAInstallPopup() {
                       Install App
                     </button>
                   </div>
+                )}
+
+                {/* Not iOS and not Android — desktop */}
+                {!isIOS && !isAndroid && (
+                  hasNativePrompt ? (
+                    <div className="flex gap-2">
+                      <button
+                        onClick={handleDismiss}
+                        className="flex-1 py-3 rounded-[14px] text-sm font-semibold border border-gray-200 bg-gray-50 hover:bg-gray-100 text-gray-600 transition"
+                      >
+                        Not now
+                      </button>
+                      <button
+                        onClick={handleInstall}
+                        className="flex-[2] inline-flex items-center justify-center gap-2 gradient-bg text-white text-sm font-bold rounded-[14px] py-3 shadow-soft hover:shadow-glow transition"
+                      >
+                        <Download className="h-4 w-4" />
+                        Install App
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="space-y-3">
+                      <div className="rounded-2xl bg-blue-50 border border-blue-100 p-4 text-sm text-blue-800 space-y-2">
+                        <div className="flex items-start gap-2">
+                          <span className="font-bold text-blue-600 shrink-0">1.</span>
+                          <span>Click the <strong>⊕ install icon</strong> in the browser address bar (right side)</span>
+                        </div>
+                        <div className="flex items-start gap-2">
+                          <span className="font-bold text-blue-600 shrink-0">2.</span>
+                          <span>Click <strong>Install</strong> in the popup</span>
+                        </div>
+                        <div className="flex items-start gap-2">
+                          <span className="font-bold text-blue-600 shrink-0">3.</span>
+                          <span>Campus Connect opens as a standalone app</span>
+                        </div>
+                      </div>
+                      <button
+                        onClick={handleDismiss}
+                        className="w-full py-3 rounded-[14px] text-sm font-semibold border border-gray-200 bg-gray-50 hover:bg-gray-100 text-gray-600 transition"
+                      >
+                        Got it
+                      </button>
+                    </div>
+                  )
                 )}
               </div>
             </div>
