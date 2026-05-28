@@ -4,11 +4,15 @@ import {
   getUserById,
   updateProfile,
   getMyProfile,
+  getUserCount,
 } from "../controllers/user.controller.js";
 import { protect } from "../middleware/auth.js";
 import { upload } from "../middleware/upload.js";
 
 const router = Router();
+
+// Public count endpoint for the college landing page
+router.get("/count", getUserCount);                            // GET  /api/users/count
 
 // All user routes require authentication
 router.use(protect);

@@ -43,8 +43,21 @@ export const getPosts = async (req, res) => {
       Post.countDocuments(filter),
     ]);
 
+    const feedPosts = posts.map((post) => {
+      const postObj = post.toObject();
+      if (req.user) {
+        const request = post.requests.find(
+          (r) => String(r.requester) === String(req.user._id)
+        );
+        postObj.userRequestStatus = request ? request.status : null;
+      } else {
+        postObj.userRequestStatus = null;
+      }
+      return postObj;
+    });
+
     res.status(200).json({
-      posts,
+      posts: feedPosts,
       pagination: {
         total,
         page: Number(page),

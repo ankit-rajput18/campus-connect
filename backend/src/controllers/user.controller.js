@@ -3,6 +3,18 @@ import Post from "../models/Post.js";
 import { uploadToCloudinary, deleteFromCloudinary } from "../middleware/upload.js";
 import { getIo } from "../socket/socket.js";
 
+// ── GET /api/users/count ────────────────────────────────────────────────────────
+// Public endpoint for the college landing page to show current verified student total.
+export const getUserCount = async (req, res) => {
+  try {
+    const count = await User.countDocuments();
+    res.status(200).json({ count });
+  } catch (error) {
+    console.error("Get user count error:", error);
+    res.status(500).json({ message: "Server error fetching user count" });
+  }
+};
+
 // ── PUT /api/users/onboard ────────────────────────────────────────────────────
 // Called after Google sign-in to complete the 3-step onboarding flow.
 export const onboardUser = async (req, res) => {

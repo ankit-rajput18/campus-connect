@@ -1,5 +1,7 @@
+import User from "../models/User.js";
+
 // The platform is built for a single college — DYP DPU.
-// This controller returns the static college data.
+// This controller returns the college data plus a live student count.
 // If you expand to multiple colleges later, replace this with a DB model.
 
 const COLLEGE = {
@@ -8,7 +10,7 @@ const COLLEGE = {
   shortName: "DYP DPU",
   city: "Pune",
   address: "Sant Tukaram Nagar, Pimpri Colony, Pune, Pimpri-Chinchwad",
-  students: 3200,
+  students: 0,
   featured: true,
   departments: [
     "Computer Engineering",
@@ -24,14 +26,27 @@ const COLLEGE = {
 };
 
 // ── GET /api/colleges ─────────────────────────────────────────────────────────
-export const getColleges = (req, res) => {
-  res.status(200).json({ colleges: [COLLEGE] });
+export const getColleges = async (req, res) => {
+  try {
+    const count = await User.countDocuments();
+    res.status(200).json({ colleges: [{ ...COLLEGE, students: count }] });
+  } catch (error) {
+    console.error("Get colleges error:", error);
+    res.status(500).json({ message: "Server error fetching colleges" });
+  }
 };
 
 // ── GET /api/colleges/:id ─────────────────────────────────────────────────────
-export const getCollegeById = (req, res) => {
+export const getCollegeById = async (req, res) => {
   if (req.params.id !== "dyp-dpu") {
     return res.status(404).json({ message: "College not found" });
   }
-  res.status(200).json({ college: COLLEGE });
+
+  try {
+    const count = await User.countDocuments();
+    res.status(200).json({ college: { ...COLLEGE, students: count } });
+  } catch (error) {
+    console.error("Get college by ID error:", error);
+    res.status(500).json({ message: "Server error fetching college" });
+  }
 };

@@ -2,7 +2,7 @@ import { motion } from "framer-motion";
 import { Bookmark, Heart, MapPin, Clock, Send, Lock } from "lucide-react";
 import { Link, useNavigate } from "@tanstack/react-router";
 import type { Post } from "@/lib/mock-data";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { sendInterest } from "@/lib/api";
 import { UserAvatar } from "@/components/UserAvatar";
@@ -43,10 +43,16 @@ const statusConfig: Record<string, { label: string; color: string }> = {
 
 export function PostCard({ post, index = 0, isGuest = false }: { post: Post; index?: number; isGuest?: boolean }) {
   const [saved, setSaved] = useState(false);
-  const [interested, setInterested] = useState(false);
+  const [requestStatus, setRequestStatus] = useState<"Pending" | "Accepted" | "Rejected" | null>(
+    post.userRequestStatus ?? null
+  );
   const cat = categoryConfig[post.category] ?? categoryConfig["Others"];
   const status = statusConfig[post.status];
   const navigate = useNavigate();
+
+  useEffect(() => {
+    setRequestStatus(post.userRequestStatus ?? null);
+  }, [post.id, post.userRequestStatus]);
 
   const requireAuth = (action: string) => {
     // Directly navigate to the sign-in page for guests instead of showing a toast.
@@ -170,23 +176,40 @@ export function PostCard({ post, index = 0, isGuest = false }: { post: Post; ind
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.97 }}
               onClick={async () => {
-                  if (interested) return;
+                  if (requestStatus === "Accepted") return;
                   const res = await sendInterest(post.id);
                   if (res.error) return toast.error(res.error || "Could not send interest");
-                  setInterested(true);
-                  toast.success(`Interest sent to ${post.student}!`, {
-                    description: "They'll be notified on their campus feed.",
-                  });
+
+                  if (res.data?.interested) {
+                    setRequestStatus("Pending");
+                    toast.success(`Interest sent to ${post.student}!`, {
+                      description: "They'll be notified on their campus feed.",
+                    });
+                  } else {
+                    setRequestStatus(null);
+                    toast.success("Interest cancelled.");
+                  }
                 }}
-              disabled={interested}
+              disabled={requestStatus === "Accepted"}
               className={`flex-[1.2] inline-flex items-center justify-center gap-1.5 font-semibold rounded-[14px] py-2.5 text-xs transition-all duration-200 ${
-                interested
-                  ? "bg-emerald-50 text-emerald-700 border border-emerald-100 cursor-default"
+                requestStatus === "Accepted"
+                  ? "bg-slate-100 text-slate-500 border border-slate-200 cursor-default"
+                  : requestStatus === "Pending"
+                  ? "bg-amber-50 text-amber-700 border border-amber-100 hover:bg-amber-100"
+                  : requestStatus === "Rejected"
+                  ? "bg-indigo-600 text-white shadow-soft hover:shadow-glow"
                   : "gradient-bg text-white shadow-soft hover:shadow-glow"
               }`}
             >
-              {interested ? (
-                <>✓ Interest Sent</>
+              {requestStatus === "Accepted" ? (
+                "Request Accepted"
+              ) : requestStatus === "Pending" ? (
+                "Cancel Interest"
+              ) : requestStatus === "Rejected" ? (
+                <>
+                  <Heart className="h-3 w-3" />
+                  Try Again
+                </>
               ) : (
                 <>
                   <Heart className="h-3 w-3" />

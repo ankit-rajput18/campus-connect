@@ -3,7 +3,7 @@ import { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Send, ArrowLeft, Search, MoreVertical,
-  Phone, Video, Circle, CheckCheck,
+  Circle, CheckCheck,
 } from "lucide-react";
 import { AppShell } from "@/components/AppShell";
 import {
@@ -453,12 +453,6 @@ function ChatPage() {
                       </div>
                     </div>
                     <div className="flex items-center gap-1">
-                      <button className="grid h-8 w-8 place-items-center rounded-xl hover:bg-white/60 transition text-muted-foreground">
-                        <Phone className="h-4 w-4" />
-                      </button>
-                      <button className="grid h-8 w-8 place-items-center rounded-xl hover:bg-white/60 transition text-muted-foreground">
-                        <Video className="h-4 w-4" />
-                      </button>
                       <button className="grid h-8 w-8 place-items-center rounded-xl hover:bg-white/60 transition text-muted-foreground">
                         <MoreVertical className="h-4 w-4" />
                       </button>

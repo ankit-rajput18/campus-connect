@@ -349,6 +349,16 @@ export async function getUserById(
   return apiRequest(`/users/${userId}`, { method: "GET" });
 }
 
+export async function getUserCount(): Promise<ApiResponse<{ count: number }>> {
+  return apiRequest("/users/count", { method: "GET" });
+}
+
+export async function getCollegeData(): Promise<
+  ApiResponse<{ colleges: { students: number }[] }>
+> {
+  return apiRequest("/colleges", { method: "GET" });
+}
+
 // ── Post endpoints ────────────────────────────────────────────────────────
 
 interface CreatePostRequest {

@@ -1,8 +1,10 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { MapPin, Users, ArrowRight, BadgeCheck, Sparkles } from "lucide-react";
 import { colleges } from "@/lib/mock-data";
 import { Logo } from "@/components/Logo";
+import { getCollegeData } from "@/lib/api";
 import dypDpuLogo from "@/assets/dyp-dpu-logo.jpeg";
 
 export const Route = createFileRoute("/colleges")({
@@ -13,6 +15,23 @@ export const Route = createFileRoute("/colleges")({
 function CollegesPage() {
   const nav = useNavigate();
   const college = colleges[0]; // single college — DYP DPU
+  const [studentCount, setStudentCount] = useState<number>(college.students);
+
+  useEffect(() => {
+    let active = true;
+    getCollegeData().then((res) => {
+      if (!active) return;
+      const count = res.data?.colleges?.[0]?.students;
+      if (!res.error && typeof count === "number") {
+        setStudentCount(count);
+      } else {
+        setStudentCount(college.students);
+      }
+    });
+    return () => {
+      active = false;
+    };
+  }, [college.students]);
 
   return (
     <div className="min-h-screen flex flex-col px-4 py-8 pb-16">
@@ -115,7 +134,7 @@ function CollegesPage() {
               <span className="hidden sm:block text-white/30">·</span>
               <span className="flex items-center gap-2 shrink-0">
                 <Users className="h-4 w-4 text-white/60" />
-                {college.students.toLocaleString()} students
+                {`${studentCount.toLocaleString()} students`}
               </span>
             </div>
 

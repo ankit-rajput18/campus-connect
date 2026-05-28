@@ -20,6 +20,7 @@ interface FeedPost {
   student: string;
   college: string;
   postedAt: string;
+  userRequestStatus?: "Pending" | "Accepted" | "Rejected" | null;
 }
 
 export const Route = createFileRoute("/dashboard")({
@@ -98,7 +99,7 @@ function Dashboard() {
       if (!activeRequest) return;
 
       if (!response.error && response.data?.posts) {
-        const normalized = response.data.posts.map((post) => ({
+        const normalized = response.data.posts.map((post: any) => ({
           id: post._id,
           title: post.title,
           description: post.description,
@@ -116,6 +117,7 @@ function Dashboard() {
             month: "short",
             day: "numeric",
           }),
+          userRequestStatus: post.userRequestStatus ?? null,
         }));
         setPosts(normalized);
       }

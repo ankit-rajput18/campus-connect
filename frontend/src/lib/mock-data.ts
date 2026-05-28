@@ -13,6 +13,7 @@ export interface Post {
   college: string;
   postedAt: string;
   status: PostStatus;
+  userRequestStatus?: "Pending" | "Accepted" | "Rejected" | null;
 }
 
 export interface College {
@@ -140,7 +141,7 @@ export const colleges: College[] = [
     shortName: COLLEGE_SHORT,
     city: COLLEGE_CITY,
     address: COLLEGE_ADDRESS,
-    students: 3200,
+    students: 0,
     featured: true,
     hasLogo: true,
   },

@@ -267,15 +267,7 @@ function CreatePost() {
               </div>
             </Field>
 
-            <Field label="Contact (WhatsApp / Email)" required>
-              <input
-              required
-              value={contact}
-              onChange={(e) => setContact(e.target.value)}
-              className="field-input"
-              placeholder="+91 98765 43210"
-            />
-            </Field>
+    
           </div>
 
           <Field label="Description" required>
