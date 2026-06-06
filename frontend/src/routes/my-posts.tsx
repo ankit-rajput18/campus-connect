@@ -213,7 +213,7 @@ function MyPosts() {
 
   const handleEditSubmit = async () => {
     if (!editingPost) return;
-    if (!editTitle || !editDescription || !editCategory || !editContact) {
+    if (!editTitle || !editDescription || !editCategory) {
       toast.error("Please fill all required fields.");
       return;
     }

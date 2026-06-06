@@ -29,7 +29,7 @@ function CreatePost() {
   const [condition, setCondition] = useState("Good");
   const [title, setTitle] = useState("");
   const [category, setCategory] = useState(categories[0] ?? "Books");
-  const [contact, setContact] = useState("");
+  //const [contact, setContact] = useState("");
   const [description, setDescription] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
@@ -55,7 +55,7 @@ function CreatePost() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!title || !description || !category || !contact) {
+    if (!title || !description || !category ) {
       toast.error("Please fill all required fields.");
       return;
     }
@@ -68,7 +68,6 @@ function CreatePost() {
         category,
         listingType,
         condition,
-        contact,
         image: imageFile || undefined,
       });
 
