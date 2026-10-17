@@ -760,7 +760,7 @@ function MyPosts() {
                                 </h4>
                                 <div className="text-[11px] text-muted-foreground flex items-center gap-1 mt-0.5">
                                   <MapPin className="h-3 w-3 shrink-0" />
-                                  <span>{r.requester?.college || "DYP DPU Student"}</span>
+                                  <span>{r.requester?.college || "SVKM's-IOT, Dhule student"}</span>
                                 </div>
                                 {isAccepted && r.requester?.email && (
                                   <div className="text-[11px] text-indigo-700 font-medium flex items-center gap-1 mt-1 bg-indigo-50/50 px-2 py-0.5 rounded-md border border-indigo-100/50 w-fit">

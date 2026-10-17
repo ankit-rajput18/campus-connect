@@ -19,6 +19,7 @@ import { UserAvatar } from "@/components/UserAvatar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
 import { getMyProfile, updateProfile } from "@/lib/api";
+import { getDisplayCollegeName } from "@/lib/mock-data";
 
 export const Route = createFileRoute("/profile")({
   head: () => ({ meta: [{ title: "Profile — Campus Connect" }] }),
@@ -155,6 +156,7 @@ function ProfilePage() {
     return date >= weekAgo;
   }).length >= 2;
   const isSenior = /final|third|fourth|last/i.test(profile?.year || "");
+  const displayedCollegeName = getDisplayCollegeName(profile?.college);
 
   const achievements = [
     {
@@ -286,7 +288,7 @@ function ProfilePage() {
                   </span>
                   <span className="flex items-center gap-1">
                     <MapPin className="h-3 w-3" />
-                    {profile?.college || profile?.department || "DYP DPU · Pimpri, Pune"}
+                    {getDisplayCollegeName(profile?.college, true)}
                   </span>
                   <span className="flex items-center gap-1">
                     <Calendar className="h-3 w-3" />
@@ -356,7 +358,7 @@ function ProfilePage() {
                         <div className="flex-1 min-w-0">
                           <div className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">College</div>
                           <div className="text-sm font-medium text-foreground leading-snug mt-0.5">
-                            {profile?.college || "Not set"}
+                            {displayedCollegeName}
                           </div>
                         </div>
                       </button>

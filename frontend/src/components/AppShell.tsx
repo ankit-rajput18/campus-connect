@@ -25,6 +25,7 @@ import { getMe, handleLogout, isAuthenticated, getNotifications, respondToReques
 import { connectSocket } from "@/lib/socket";
 import type { Notification } from "@/lib/api";
 import { toast } from "sonner";
+import { getDisplayCollegeName } from "@/lib/mock-data";
 
 const navItems = [
   { to: "/dashboard", icon: Home, label: "Feed" },
@@ -405,7 +406,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                           <div>
                             <div className="text-sm font-semibold">{user?.name || "Campus Student"}</div>
                             <div className="text-[11px] text-muted-foreground">
-                              {user?.college || user?.department || "DYP DPU · Pimpri, Pune"}
+                              {getDisplayCollegeName(user?.college, true)}
                             </div>
                           </div>
                         </div>

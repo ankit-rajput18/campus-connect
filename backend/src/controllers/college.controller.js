@@ -1,15 +1,15 @@
 import User from "../models/User.js";
 
-// The platform is built for a single college — DYP DPU.
+// The platform is built for a single college — SVKM's-IOT, Dhule.
 // This controller returns the college data plus a live student count.
 // If you expand to multiple colleges later, replace this with a DB model.
 
 const COLLEGE = {
   id: "dyp-dpu",
-  name: "Dr. D. Y. Patil Institute of Technology",
-  shortName: "DYP DPU",
-  city: "Pune",
-  address: "Sant Tukaram Nagar, Pimpri Colony, Pune, Pimpri-Chinchwad",
+  name: "Shri Vile Parle Kelvani Mandal's Institute of Technology, Dhule",
+  shortName: "SVKM's-IOT, Dhule",
+  city: "Dhule",
+  address: "Survey No. 499, Plot No. 01, 02 & 03, Behind Gurudwara, Mumbai-Agra National Highway (NH-3), Samta Nagar, Dhule, Maharashtra 424001 / 424311, India",
   students: 0,
   featured: true,
   departments: [

@@ -27,10 +27,19 @@ export interface College {
   hasLogo?: boolean;
 }
 
-export const COLLEGE_NAME = "Dr. D. Y. Patil Institute of Technology";
-export const COLLEGE_SHORT = "DYP DPU";
-export const COLLEGE_CITY = "Pune";
-export const COLLEGE_ADDRESS = "Sant Tukaram Nagar, Pimpri Colony, Pune, Pimpri-Chinchwad";
+export const COLLEGE_NAME = "Shri Vile Parle Kelvani Mandal's Institute of Technology, Dhule";
+export const COLLEGE_SHORT = "SVKM's-IOT, Dhule";
+export const COLLEGE_CITY = "Dhule";
+export const COLLEGE_ADDRESS = "Survey No. 499, Plot No. 01, 02 & 03, Behind Gurudwara, Mumbai-Agra National Highway (NH-3), Samta Nagar, Dhule, Maharashtra 424001 / 424311, India";
+
+const LEGACY_COLLEGE_NAME = /(?:d\.?\s*y\.?\s*patil|dyp\s*dpu|dypit)/i;
+
+export function getDisplayCollegeName(college?: string, compact = false): string {
+  if (!college || LEGACY_COLLEGE_NAME.test(college)) {
+    return compact ? COLLEGE_SHORT : COLLEGE_NAME;
+  }
+  return college;
+}
 
 export const mockPosts: Post[] = [
   {
@@ -133,7 +142,7 @@ export const mockPosts: Post[] = [
 
 export const categories: Category[] = ["Books", "Notes", "Electronics", "Hostel Essentials", "Others"];
 
-// Single college — the entire platform is built for DYP DPU
+// Single college — the entire platform is built for SVKM's-IOT, Dhule
 export const colleges: College[] = [
   {
     id: "dyp-dpu",

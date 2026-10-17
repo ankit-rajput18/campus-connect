@@ -1,6 +1,6 @@
 # Campus Connect
 
-Student exchange platform for Dr. D. Y. Patil Institute of Technology, Pimpri, Pune.  
+Student exchange platform for Shri Vile Parle Kelvani Mandal's Institute of Technology, Dhule.  
 Trade books, notes & essentials with verified campus peers.
 
 ---

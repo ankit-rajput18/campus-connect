@@ -4,7 +4,7 @@ import {
 } from "lucide-react";
 import { useRef, useState } from "react";
 import { useNavigate } from "@tanstack/react-router";
-import { DypDpuLogo } from "@/components/DypDpuLogo";
+import svkmLogo from "@/assets/ssss.png";
 import { toast } from "sonner";
 import { onboardUser, notifyUserUpdated } from "@/lib/api";
 
@@ -283,7 +283,11 @@ export function OnboardingOverlay({ onClose }: { onClose: () => void }) {
         </button>
         <div className="flex justify-center mb-6">
           <div className="bg-white rounded-[14px] px-4 py-2 shadow-card border border-white/70">
-            <DypDpuLogo size={28} />
+            <img
+              src={svkmLogo}
+              alt="SVKM's Institute of Technology, Dhule logo"
+              className="h-12 max-w-[180px] object-contain"
+            />
           </div>
         </div>
         <p className="text-center text-xs font-bold uppercase tracking-widest text-muted-foreground mb-4">

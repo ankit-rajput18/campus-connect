@@ -104,7 +104,7 @@ function AuthPage() {
           </h1>
 
           <p className="text-center text-sm text-muted-foreground mb-8">
-            Use your DYP DPU account to access Campus Connect.
+            Use your SVKM's-IOT, Dhule account to access Campus Connect.
           </p>
 
           <GoogleButton

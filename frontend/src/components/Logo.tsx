@@ -19,7 +19,7 @@ export function Logo({ to = "/" }: { to?: string }) {
           Campus<span className="gradient-text">Connect</span>
         </div>
         <div className="text-[9px] font-semibold uppercase tracking-[0.12em] text-muted-foreground mt-0.5">
-          DYP DPU · Pimpri, Pune
+          SVKM's-IOT · Dhule
         </div>
       </div>
     </Link>

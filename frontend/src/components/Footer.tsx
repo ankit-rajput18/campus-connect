@@ -33,7 +33,7 @@ export function Footer() {
             <div className="md:col-span-5">
               <Logo />
               <p className="mt-4 text-sm text-muted-foreground leading-relaxed max-w-xs">
-                The student exchange platform built for Dr. D. Y. Patil Institute of Technology, Pimpri, Pune.
+                The student exchange platform built for Shri Vile Parle Kelvani Mandal's Institute of Technology, Dhule.
                 Trade books, notes & essentials with verified campus peers.
               </p>
               {/* Social links */}
@@ -89,7 +89,7 @@ export function Footer() {
           {/* Bottom bar */}
           <div className="mt-10 pt-6 border-t border-border/50 flex flex-col sm:flex-row items-center justify-between gap-3">
             <span className="text-xs text-muted-foreground">
-              © 2026 Campus Connect · DYP DPU Pimpri, Pune
+              © 2026 Campus Connect · SVKM's-IOT, Dhule
             </span>
             <span className="text-xs text-muted-foreground flex items-center gap-1">
               Made with <Heart className="h-3 w-3 fill-rose-500 text-rose-500" /> for students

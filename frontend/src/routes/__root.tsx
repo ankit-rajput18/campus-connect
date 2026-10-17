@@ -95,19 +95,19 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1, viewport-fit=cover" },
-      { title: "Campus Connect — Dr. D. Y. Patil Institute of Technology" },
+      { title: "Campus Connect — SVKM's-IOT, Dhule" },
       {
         name: "description",
         content:
-          "Campus Connect is the student exchange platform for Dr. D. Y. Patil Institute of Technology, Pimpri, Pune.",
+          "Campus Connect is the student exchange platform for Shri Vile Parle Kelvani Mandal's Institute of Technology, Dhule.",
       },
       { name: "theme-color", content: "#0078FF" },
       { name: "mobile-web-app-capable", content: "yes" },
       { name: "apple-mobile-web-app-capable", content: "yes" },
       { name: "apple-mobile-web-app-status-bar-style", content: "default" },
       { name: "apple-mobile-web-app-title", content: "Campus Connect" },
-      { property: "og:title", content: "Campus Connect — Dr. D. Y. Patil Institute of Technology" },
-      { property: "og:description", content: "The student exchange platform built for DYP DPU, Pimpri, Pune." },
+      { property: "og:title", content: "Campus Connect — SVKM's-IOT, Dhule" },
+      { property: "og:description", content: "The student exchange platform built for SVKM's-IOT, Dhule." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
@@ -248,7 +248,7 @@ function PWAInstallPopup() {
                   />
                   <div className="text-white">
                     <div className="font-display font-bold text-xl leading-tight">Campus Connect</div>
-                    <div className="text-white/80 text-xs mt-0.5">DYP DPU · Pimpri, Pune</div>
+                    <div className="text-white/80 text-xs mt-0.5">SVKM's-IOT · Dhule</div>
                   </div>
                 </div>
               </div>
@@ -326,7 +326,7 @@ function PWAInstallPopup() {
                             try {
                               await navigator.share({
                                 title: "Campus Connect",
-                                text: "Install Campus Connect — DYP DPU student exchange platform",
+                                text: "Install Campus Connect — SVKM's-IOT, Dhule student exchange platform",
                                 url: window.location.origin,
                               });
                             } catch {

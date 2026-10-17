@@ -78,7 +78,7 @@ const userSchema = new mongoose.Schema(
     },
     college: {
       type: String,
-      default: "Dr. D. Y. Patil Institute of Technology",
+      default: "Shri Vile Parle Kelvani Mandal's Institute of Technology, Dhule",
     },
 
     // ── Onboarding flag ───────────────────────────────────

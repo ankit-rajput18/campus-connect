@@ -1,7 +1,7 @@
 {
   "name": "Campus Connect",
   "short_name": "CampusConnect",
-  "description": "Student exchange platform for Dr. D. Y. Patil Institute of Technology",
+  "description": "Student exchange platform for SVKM's-IOT, Dhule",
   "start_url": "/dashboard",
   "display": "standalone",
   "background_color": "#ffffff",

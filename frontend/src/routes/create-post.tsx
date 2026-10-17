@@ -284,7 +284,7 @@ function CreatePost() {
           <div className="flex items-start gap-2.5 bg-indigo-50 border border-indigo-100 rounded-[14px] p-3.5">
             <Info className="h-4 w-4 text-indigo-500 shrink-0 mt-0.5" />
             <p className="text-xs text-indigo-700 leading-relaxed">
-              Your post will be visible to all verified students at Dr. D. Y. Patil Institute of Technology. Make sure your
+              Your post will be visible to all verified students at Shri Vile Parle Kelvani Mandal's Institute of Technology, Dhule. Make sure your
               contact details are correct so interested students can reach you.
             </p>
           </div>

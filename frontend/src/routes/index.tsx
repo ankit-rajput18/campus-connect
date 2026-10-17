@@ -24,16 +24,16 @@ import heroImg from "@/assets/hero-illustration.png";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Campus Connect — Dr. D. Y. Patil Institute of Technology" },
+      { title: "Campus Connect — SVKM's-IOT, Dhule" },
       {
         name: "description",
         content:
-          "Exchange books, notes & student essentials easily within Dr. D. Y. Patil Institute of Technology, Pimpri, Pune.",
+          "Exchange books, notes & student essentials easily within Shri Vile Parle Kelvani Mandal's Institute of Technology, Dhule.",
       },
-      { property: "og:title", content: "Campus Connect — DYP DPU Pune" },
+      { property: "og:title", content: "Campus Connect — SVKM's-IOT, Dhule" },
       {
         property: "og:description",
-        content: "The student exchange platform built for DYP DPU, Pimpri, Pune.",
+        content: "The student exchange platform built for SVKM's-IOT, Dhule.",
       },
     ],
   }),
@@ -152,7 +152,7 @@ function Landing() {
               className="inline-flex items-center gap-2 glass rounded-full px-4 py-1.5 text-xs font-semibold text-foreground/80 shadow-soft mb-6"
             >
               <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
-              Dr. D. Y. Patil Institute of Technology, Pimpri, Pune
+              Shri Vile Parle Kelvani Mandal's Institute of Technology, Dhule
               <Sparkles className="h-3 w-3 text-violet-500" />
             </motion.div>
 
@@ -165,7 +165,7 @@ function Landing() {
             </h1>
 
             <p className="mt-5 text-base md:text-lg text-muted-foreground leading-relaxed max-w-lg">
-              The community-first exchange platform for DYP DPU, Pimpri, Pune. Save money, reduce waste,
+              The community-first exchange platform for SVKM's-IOT, Dhule. Save money, reduce waste,
               and build your campus network — all in one place.
             </p>
 
@@ -262,7 +262,7 @@ function Landing() {
                 </div>
                 <div className="leading-tight">
                   <div className="text-xs font-bold">Verified Student</div>
-                  <div className="text-[10px] text-muted-foreground">DYP DPU · Pimpri</div>
+                  <div className="text-[10px] text-muted-foreground">SVKM's-IOT · Dhule</div>
                 </div>
               </motion.div>
 

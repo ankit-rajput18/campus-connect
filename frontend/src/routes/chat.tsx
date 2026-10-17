@@ -449,7 +449,7 @@ function ChatPage() {
                     <div className="flex-1 min-w-0">
                       <div className="font-semibold text-sm">{other.name}</div>
                       <div className="text-xs text-muted-foreground truncate">
-                        {other.department || "DYP DPU Student"}
+                        {other.department || "SVKM's-IOT, Dhule student"}
                       </div>
                     </div>
                     <div className="flex items-center gap-1">

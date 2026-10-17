@@ -157,7 +157,7 @@ function Dashboard() {
           <div>
             <h1 className="font-display text-2xl md:text-3xl font-bold">Campus Feed</h1>
             <p className="text-sm text-muted-foreground mt-0.5">
-              Latest from DYP DPU · Pimpri, Pune
+              Latest from SVKM's-IOT · Dhule
             </p>
           </div>
           {/* Sort (desktop) */}

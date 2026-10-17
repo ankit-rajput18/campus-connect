@@ -5,7 +5,7 @@ import { MapPin, Users, ArrowRight, BadgeCheck, Sparkles } from "lucide-react";
 import { colleges } from "@/lib/mock-data";
 import { Logo } from "@/components/Logo";
 import { getCollegeData } from "@/lib/api";
-import dypDpuLogo from "@/assets/dyp-dpu-logo.jpeg";
+import svkmLogo from "@/assets/ssss.png";
 
 export const Route = createFileRoute("/colleges")({
   head: () => ({ meta: [{ title: "Choose your college — Campus Connect" }] }),
@@ -14,7 +14,7 @@ export const Route = createFileRoute("/colleges")({
 
 function CollegesPage() {
   const nav = useNavigate();
-  const college = colleges[0]; // single college — DYP DPU
+  const college = colleges[0]; // single college — SVKM's-IOT, Dhule
   const [studentCount, setStudentCount] = useState<number>(college.students);
 
   useEffect(() => {
@@ -100,11 +100,9 @@ function CollegesPage() {
               {/* Logo on white pill */}
               <div className="bg-white rounded-[16px] px-4 py-3 shadow-soft inline-flex items-center justify-center">
                 <img
-                  src={dypDpuLogo}
-                  alt="DYP DPU logo"
-                  className="h-16 w-16 object-contain"
-                  width={70}
-                  height={70}
+                  src={svkmLogo}
+                  alt="SVKM's Institute of Technology, Dhule logo"
+                  className="h-16 max-w-[180px] object-contain"
                 />
               </div>
 
@@ -118,7 +116,7 @@ function CollegesPage() {
             {/* College name */}
             <div>
               <p className="text-white/60 text-xs font-semibold uppercase tracking-widest mb-2">
-                Dr. D. Y. Patil University
+                SVKM's-IOT, Dhule
               </p>
               <h2 className="font-display text-2xl md:text-3xl font-bold text-white leading-tight">
                 {college.name}
@@ -168,7 +166,7 @@ function CollegesPage() {
           transition={{ delay: 0.4 }}
           className="mt-6 text-center text-xs text-muted-foreground"
         >
-          Only verified students of DYP DPU can post and connect.{" "}
+          Only verified students of SVKM's-IOT, Dhule can post and connect.{" "}
           <span className="text-primary font-medium cursor-pointer hover:underline">
             Learn more
           </span>

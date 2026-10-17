@@ -9,6 +9,9 @@ const CONDITIONS = ["Like New", "Good", "Fair", "Used"];
 // Maps the college name stored on the User to a short prefix for the postRef.
 // Add more colleges here if the platform expands.
 export const COLLEGE_SLUG_MAP = {
+  "Shri Vile Parle Kelvani Mandal's Institute of Technology, Dhule": "SVKMIOT_DHULE",
+  "SVKM's-IOT, Dhule": "SVKMIOT_DHULE",
+  // Keep historical names mapped so existing accounts retain stable post references.
   "Dr. D. Y. Patil Institute of Technology": "DYPIT_PIMPRI",
   "DYP DPU": "DYPIT_PIMPRI",
 };
