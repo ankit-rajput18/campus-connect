@@ -1,7 +1,8 @@
 # Campus Connect
 
-Student exchange platform for Shri Vile Parle Kelvani Mandal's Institute of Technology, Dhule.  
-Trade books, notes & essentials with verified campus peers.
+Campus Connect is a student-focused platform built to make campus life easier. It helps students buy, sell, and exchange books, notes, study materials, and other essentials in a safe and simple way. Students can also connect with peers, chat, share updates, and discover campus listings from one place.
+
+This project is designed for students who want a faster and more convenient way to trade academic resources and stay connected with their campus community.
 
 ---
 
@@ -12,6 +13,16 @@ campus_connect/
 ├── backend/    # Node.js + Express + MongoDB + Socket.IO
 └── frontend/   # React + TanStack Router + Vite + Tailwind
 ```
+
+---
+
+## What this project does
+
+- Buy and sell books, notes, and study materials
+- Post listings for campus items and academic resources
+- Chat with students directly through the platform
+- Discover useful items shared by peers
+- Keep everything in one student community marketplace
 
 ---
 
