@@ -32,9 +32,33 @@ const statusColors: Record<string, string> = {
   Pending: "text-amber-700 bg-amber-50 border border-amber-100",
 };
 
+interface ProfileRecentPost {
+  title: string;
+  createdAt: string;
+  status?: string;
+}
+
+interface ProfileData {
+  name: string;
+  email?: string;
+  avatar: string;
+  bio: string;
+  year: string;
+  branch: string;
+  college?: string;
+  department?: string;
+  semester?: string;
+  createdAt?: string;
+  totalPosts?: number;
+  totalExchanges?: number;
+  totalViews?: number;
+  bookPosts?: number;
+  recentPosts?: ProfileRecentPost[];
+}
+
 function ProfilePage() {
   const [activeTab, setActiveTab] = useState<"overview" | "edit">("overview");
-  const [profile, setProfile] = useState<any>(null);
+  const [profile, setProfile] = useState<ProfileData | null>(null);
   const [form, setForm] = useState({
     name: "",
     bio: "",
@@ -149,7 +173,7 @@ function ProfilePage() {
       : 0;
   const karmaLabel = typeof karmaValue === "number" ? karmaValue.toFixed(1) : String(karmaValue);
   const recentPosts = profile?.recentPosts ?? [];
-  const hotStreakActive = recentPosts.filter((post) => {
+  const hotStreakActive = recentPosts.filter((post: ProfileRecentPost) => {
     const date = new Date(post.createdAt);
     const weekAgo = new Date();
     weekAgo.setDate(weekAgo.getDate() - 7);
@@ -162,13 +186,13 @@ function ProfilePage() {
     {
       emoji: "🏆",
       label: "Top Trader",
-      earned: profile?.totalExchanges >= 3,
+      earned: (profile?.totalExchanges ?? 0) >= 3,
       description: "Earned by completing multiple exchanges.",
     },
     {
       emoji: "📚",
       label: "Book Worm",
-      earned: profile?.bookPosts >= 1,
+      earned: (profile?.bookPosts ?? 0) >= 1,
       description: "Posting book listings earns this badge.",
     },
     {
@@ -186,7 +210,7 @@ function ProfilePage() {
     {
       emoji: "🤝",
       label: "Connector",
-      earned: profile?.totalExchanges > 0,
+      earned: (profile?.totalExchanges ?? 0) > 0,
       description: "Completed at least one exchange.",
     },
     {
@@ -522,7 +546,7 @@ function ProfilePage() {
           </div>
 
           <div className="space-y-3">
-            {recentPosts.map((p, i) => (
+            {recentPosts.map((p: ProfileRecentPost, i: number) => (
               <motion.div
                 key={`recent-${i}-${p.title}`}
                 initial={{ opacity: 0, x: -8 }}
@@ -542,7 +566,7 @@ function ProfilePage() {
                 </div>
                 <span
                   className={`text-[10px] font-bold px-2.5 py-1 rounded-full shrink-0 ${
-                    statusColors[p.status]
+                    statusColors[p.status ?? "Available"]
                   }`}
                 >
                   {p.status === "Available" ? "Active" : p.status}

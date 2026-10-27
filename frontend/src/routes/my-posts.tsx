@@ -35,7 +35,7 @@ interface UserPost {
   views: number;
   requests?: Array<{
     id: string;
-    requester: { _id: string; name: string; avatar?: string; college?: string } | null;
+    requester: { _id: string; name: string; avatar?: string; college?: string; email?: string } | null;
     message?: string;
     status?: string;
     respondedAt?: string | null;

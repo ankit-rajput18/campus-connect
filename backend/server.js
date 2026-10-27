@@ -7,19 +7,9 @@ import connectDB from "./src/config/db.js";
 import { configureCloudinary } from "./src/config/cloudinary.js";
 import { initFirebase } from "./src/config/firebase.js";
 import initSocket from "./src/socket/socket.js";
+import { isAllowedOrigin } from "./src/config/cors.js";
 
 const PORT = process.env.PORT || 5000;
-const socketAllowedOrigins = [
-  process.env.CLIENT_URL,
-  "http://localhost:5173",
-  "http://localhost:8080",
-  "http://localhost:8081",
-  "http://127.0.0.1:5173",
-  "http://127.0.0.1:8080",
-  "http://127.0.0.1:8081",
-  "http://192.168.29.217:8080",
-  "http://192.168.29.217:5173",
-].filter(Boolean);
 
 // ── Boot sequence ─────────────────────────────────────────────────────────────
 const start = async () => {
@@ -41,7 +31,10 @@ const start = async () => {
   // 4. Attach Socket.IO to the same HTTP server
   const io = new Server(httpServer, {
     cors: {
-      origin: socketAllowedOrigins,
+      origin: (origin, callback) => {
+        if (isAllowedOrigin(origin)) return callback(null, true);
+        callback(new Error(`CORS policy blocked origin: ${origin}`));
+      },
       credentials: true,
     },
   });

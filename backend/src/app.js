@@ -6,21 +6,9 @@ import userRoutes from "./routes/user.routes.js";
 import postRoutes from "./routes/post.routes.js";
 import chatRoutes from "./routes/chat.routes.js";
 import collegeRoutes from "./routes/college.routes.js";
+import { isAllowedOrigin } from "./config/cors.js";
 
 const app = express();
-
-// ── CORS ──────────────────────────────────────────────────────────────────────
-const allowedOrigins = [
-  process.env.CLIENT_URL,
-  "http://localhost:5173",
-  "http://localhost:8080",
-  "http://localhost:8081",
-  "http://127.0.0.1:5173",
-  "http://127.0.0.1:8080",
-  "http://127.0.0.1:8081",
-  "http://192.168.29.217:8080",
-  "http://192.168.29.217:5173",
-].filter(Boolean);
 
 app.use((req, res, next) => {
   console.log(`📨 ${req.method} ${req.path} | Origin: ${req.get("origin") || "no-origin"}`);
@@ -30,11 +18,7 @@ app.use((req, res, next) => {
 app.use(
   cors({
     origin: (origin, callback) => {
-      if (!origin || allowedOrigins.includes(origin)) {
-        console.log(`✅ CORS allowed: ${origin}`);
-        return callback(null, true);
-      }
-      console.error(`❌ CORS blocked: ${origin}`);
+      if (isAllowedOrigin(origin)) return callback(null, true);
       callback(new Error(`CORS policy blocked origin: ${origin}`));
     },
     credentials: true,

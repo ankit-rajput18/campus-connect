@@ -3,19 +3,27 @@
  * Handles JWT token management, request/response formatting, and error handling.
  */
 
-// Dynamically determine API URL based on environment and current host
+const DEFAULT_PRODUCTION_API_URL =
+  "https://campus-connect-rdg6.onrender.com/api";
+
+// Use the configured backend in production; localhost is only a development fallback.
 function getApiBaseUrl(): string {
   const isBrowser = typeof window !== "undefined";
   const host = isBrowser ? window.location.hostname : "localhost";
   const protocol = isBrowser ? window.location.protocol : "http:";
 
-  const envUrl = import.meta.env.VITE_API_URL;
-
-  // If the env URL is explicitly configured for localhost but the app is served from a remote host,
-  // switch to the current host for mobile / LAN access.
-  if (
+  const envUrl = import.meta.env.VITE_API_URL?.trim().replace(/\/+$/, "");
+  const isLocalEnvUrl =
     envUrl &&
-    envUrl.includes("localhost") &&
+    /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?(?:\/|$)/i.test(envUrl);
+
+  if (import.meta.env.PROD) {
+    return envUrl && !isLocalEnvUrl ? envUrl : DEFAULT_PRODUCTION_API_URL;
+  }
+
+  // Allow LAN devices to reach a locally running backend during development.
+  if (
+    isLocalEnvUrl &&
     isBrowser &&
     host !== "localhost" &&
     host !== "127.0.0.1"
@@ -380,10 +388,24 @@ interface Post {
   condition: string;
   contact: string;
   image?: string;
-  author: UserProfile;
+  author?: UserProfile;
   status: string;
   views: number;
   createdAt: string;
+  requests?: Array<{
+    _id: string;
+    requester?: {
+      _id: string;
+      name: string;
+      avatar?: string;
+      college?: string;
+      department?: string;
+      email?: string;
+    } | null;
+    message?: string;
+    status?: string;
+    respondedAt?: string | null;
+  }>;
 }
 
 export async function createPost(

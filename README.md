@@ -58,7 +58,7 @@ npm run dev            # starts on port 5000
 | `CLOUDINARY_CLOUD_NAME` | Cloudinary cloud name |
 | `CLOUDINARY_API_KEY` | Cloudinary API key |
 | `CLOUDINARY_API_SECRET` | Cloudinary API secret |
-| `CLIENT_URL` | Frontend URL for CORS (e.g. `http://localhost:8080`) |
+| `CLIENT_URL` | Comma-separated frontend origins for CORS (for example `http://localhost:8080,https://your-app.vercel.app`); Vercel preview URLs are also supported |
 
 ---
 
@@ -75,7 +75,7 @@ npm run dev            # starts on port 8080
 
 | Variable | Description |
 |---|---|
-| `VITE_API_URL` | Backend API URL (e.g. `http://localhost:5000/api`) |
+| `VITE_API_URL` | Backend API URL (local: `http://localhost:5000/api`; production: `https://campus-connect-rdg6.onrender.com/api`) |
 | `VITE_FIREBASE_API_KEY` | Firebase web API key |
 | `VITE_FIREBASE_AUTH_DOMAIN` | Firebase auth domain |
 | `VITE_FIREBASE_PROJECT_ID` | Firebase project ID |
@@ -88,12 +88,12 @@ npm run dev            # starts on port 8080
 ## Deployment
 
 ### Backend — Render / Railway / Fly.io
-1. Set all environment variables in the platform dashboard
+1. Set all environment variables in the platform dashboard, including `CLIENT_URL` with the production Vercel origin. `CLIENT_URL` accepts a comma-separated list; `https://*.vercel.app` preview origins are allowed automatically.
 2. Build command: `npm install`
 3. Start command: `npm start`
 
 ### Frontend — Cloudflare Pages / Vercel / Netlify
-1. Set all `VITE_*` environment variables in the platform dashboard
+1. Set all `VITE_*` environment variables in the platform dashboard. Set `VITE_API_URL` to `https://campus-connect-rdg6.onrender.com/api` (or your deployed backend URL). If omitted in a production build, the app uses this project's production API URL.
 2. Build command: `npm run build`
 3. Output directory: `dist`
 

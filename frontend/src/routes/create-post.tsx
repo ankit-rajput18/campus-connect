@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Upload, ImagePlus, X, Sparkles, ChevronDown, Info } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { AppShell } from "@/components/AppShell";
-import { categories } from "@/lib/mock-data";
+import { categories, type Category } from "@/lib/mock-data";
 import { createPost, isAuthenticated } from "@/lib/api";
 import { toast } from "sonner";
 
@@ -28,8 +28,8 @@ function CreatePost() {
   const [listingType, setListingType] = useState("exchange");
   const [condition, setCondition] = useState("Good");
   const [title, setTitle] = useState("");
-  const [category, setCategory] = useState(categories[0] ?? "Books");
-  //const [contact, setContact] = useState("");
+  const [category, setCategory] = useState<Category>(categories[0] ?? "Books");
+  const [contact, setContact] = useState("");
   const [description, setDescription] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
@@ -55,7 +55,7 @@ function CreatePost() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!title || !description || !category ) {
+    if (!title || !description || !category || !contact) {
       toast.error("Please fill all required fields.");
       return;
     }
@@ -68,6 +68,7 @@ function CreatePost() {
         category,
         listingType,
         condition,
+        contact,
         image: imageFile || undefined,
       });
 
@@ -239,7 +240,7 @@ function CreatePost() {
                 <select
                   required
                   value={category}
-                  onChange={(e) => setCategory(e.target.value)}
+                  onChange={(e) => setCategory(e.target.value as Category)}
                   className="field-input appearance-none pr-9"
                 >
                   {categories.map((c) => (
@@ -248,6 +249,16 @@ function CreatePost() {
                 </select>
                 <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
               </div>
+            </Field>
+
+            <Field label="Contact" required>
+              <input
+                required
+                value={contact}
+                onChange={(e) => setContact(e.target.value)}
+                className="field-input"
+                placeholder="WhatsApp / phone / email"
+              />
             </Field>
 
             <Field label="Condition" required>
