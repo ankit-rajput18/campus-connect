@@ -29,6 +29,14 @@ export const upload = multer({
  */
 export const uploadToCloudinary = (buffer, folder, publicId) => {
   return new Promise((resolve, reject) => {
+    const config = cloudinary.config();
+    if (!config.cloud_name || !config.api_key || !config.api_secret) {
+      const error = new Error("Image storage is not configured on the server.");
+      error.code = "CLOUDINARY_NOT_CONFIGURED";
+      reject(error);
+      return;
+    }
+
     const options = {
       folder: `campus_connect/${folder}`,
       resource_type: "image",
@@ -37,7 +45,17 @@ export const uploadToCloudinary = (buffer, folder, publicId) => {
     if (publicId) options.public_id = publicId;
 
     const uploadStream = cloudinary.uploader.upload_stream(options, (error, result) => {
-      if (error) return reject(error);
+      if (error) {
+        const uploadError = new Error("Image upload failed. Please try again.");
+        uploadError.code = "CLOUDINARY_UPLOAD_FAILED";
+        uploadError.cause = error;
+        return reject(uploadError);
+      }
+      if (!result?.secure_url || !result?.public_id) {
+        const uploadError = new Error("Image upload did not return a valid result.");
+        uploadError.code = "CLOUDINARY_UPLOAD_FAILED";
+        return reject(uploadError);
+      }
       resolve(result);
     });
 
@@ -54,5 +72,60 @@ export const deleteFromCloudinary = async (publicId) => {
     await cloudinary.uploader.destroy(publicId);
   } catch (err) {
     console.error("Cloudinary delete error:", err.message);
+  }
+};
+
+export const deleteFromCloudinaryStrict = async (publicId) => {
+  if (!publicId) return;
+
+  const config = cloudinary.config();
+  if (!config.cloud_name || !config.api_key || !config.api_secret) {
+    const error = new Error("Image storage is not configured on the server.");
+    error.code = "CLOUDINARY_NOT_CONFIGURED";
+    throw error;
+  }
+
+  try {
+    const result = await cloudinary.uploader.destroy(publicId);
+    if (result.result !== "ok" && result.result !== "not found") {
+      throw new Error(`Unexpected Cloudinary delete result: ${result.result}`);
+    }
+  } catch (cause) {
+    const error = new Error("The image could not be deleted from storage.");
+    error.code = "CLOUDINARY_DELETE_FAILED";
+    error.cause = cause;
+    throw error;
+  }
+};
+
+export const getProfileImagePublicIdFromUrl = (imageUrl, imageType) => {
+  if (!imageUrl) return "";
+
+  try {
+    const url = new URL(imageUrl);
+    if (url.hostname !== "res.cloudinary.com") return "";
+
+    const path = decodeURIComponent(url.pathname);
+    const uploadIndex = path.indexOf("/image/upload/");
+    if (uploadIndex === -1) return "";
+
+    let assetPath = path.slice(uploadIndex + "/image/upload/".length);
+    assetPath = assetPath.replace(/^(?:[^/]+,)*[^/]+\/(?=v\d+\/)/, "");
+    assetPath = assetPath.replace(/^v\d+\//, "");
+
+    const expectedFolder =
+      imageType === "avatar"
+        ? "campus_connect/avatars/"
+        : "campus_connect/backgrounds/";
+    const folderIndex = assetPath.indexOf(expectedFolder);
+    if (folderIndex === -1) return "";
+
+    const publicIdWithExtension = assetPath.slice(folderIndex);
+    const extensionIndex = publicIdWithExtension.lastIndexOf(".");
+    return extensionIndex > expectedFolder.length
+      ? publicIdWithExtension.slice(0, extensionIndex)
+      : publicIdWithExtension;
+  } catch {
+    return "";
   }
 };

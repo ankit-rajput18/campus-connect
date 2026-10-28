@@ -10,6 +10,8 @@ import {
   Shuffle,
   Check,
   Camera,
+  ImagePlus,
+  Trash2,
   Star,
   TrendingUp,
 } from "lucide-react";
@@ -17,8 +19,15 @@ import { useEffect, useRef, useState, ChangeEvent } from "react";
 import { AppShell } from "@/components/AppShell";
 import { UserAvatar } from "@/components/UserAvatar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { toast } from "sonner";
-import { getMyProfile, updateProfile } from "@/lib/api";
+import { deleteProfileImage as deleteProfileImageRequest, getMyProfile, updateProfile } from "@/lib/api";
 import { getDisplayCollegeName } from "@/lib/mock-data";
 
 export const Route = createFileRoute("/profile")({
@@ -42,6 +51,7 @@ interface ProfileData {
   name: string;
   email?: string;
   avatar: string;
+  backgroundImage?: string;
   bio: string;
   year: string;
   branch: string;
@@ -65,11 +75,13 @@ function ProfilePage() {
     year: "",
     branch: "",
   });
-  const [avatarFile, setAvatarFile] = useState<File | null>(null);
   const [avatarPreview, setAvatarPreview] = useState<string>("");
+  const [backgroundImagePreview, setBackgroundImagePreview] = useState<string>("");
+  const [imageMenu, setImageMenu] = useState<"avatar" | "banner" | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const backgroundInputRef = useRef<HTMLInputElement | null>(null);
 
   useEffect(() => {
     const loadProfile = async () => {
@@ -78,8 +90,11 @@ function ProfilePage() {
         toast.error(response.error);
       }
       if (response.data?.user) {
-        setProfile(response.data.user);
+        setProfile((current) =>
+          current ? { ...current, ...response.data.user } : response.data.user,
+        );
         setAvatarPreview(response.data.user.avatar || "");
+        setBackgroundImagePreview(response.data.user.backgroundImage || "");
         setForm({
           name: response.data.user.name || "",
           bio: response.data.user.bio || "",
@@ -100,7 +115,6 @@ function ProfilePage() {
       bio: form.bio,
       year: form.year,
       branch: form.branch,
-      avatar: avatarFile || undefined,
     });
     setSaving(false);
 
@@ -112,7 +126,7 @@ function ProfilePage() {
     if (response.data?.user) {
       setProfile(response.data.user);
       setAvatarPreview(response.data.user.avatar || "");
-      setAvatarFile(null);
+      setBackgroundImagePreview(response.data.user.backgroundImage || "");
       setForm({
         name: response.data.user.name || "",
         bio: response.data.user.bio || "",
@@ -127,6 +141,7 @@ function ProfilePage() {
   };
 
   const openAvatarPicker = () => {
+    setImageMenu(null);
     setActiveTab("edit");
     if (fileInputRef.current) {
       fileInputRef.current.value = "";
@@ -134,15 +149,105 @@ function ProfilePage() {
     }
   };
 
+  const openBackgroundImagePicker = () => {
+    setImageMenu(null);
+    setActiveTab("edit");
+    if (backgroundInputRef.current) {
+      backgroundInputRef.current.value = "";
+      backgroundInputRef.current.click();
+    }
+  };
+
   const handleAvatarChange = (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) return;
-    setAvatarFile(file);
+    void saveProfileImage(file, "avatar");
+  };
+
+  const handleBackgroundImageChange = (event: ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+    void saveProfileImage(file, "backgroundImage");
+  };
+
+  const saveProfileImage = async (
+    file: File,
+    field: "avatar" | "backgroundImage",
+  ) => {
+    const previousImage =
+      field === "avatar" ? profile?.avatar || "" : profile?.backgroundImage || "";
     const reader = new FileReader();
     reader.onload = () => {
-      setAvatarPreview(reader.result as string);
+      const preview = reader.result as string;
+      if (field === "avatar") {
+        setAvatarPreview(preview);
+      } else {
+        setBackgroundImagePreview(preview);
+      }
     };
     reader.readAsDataURL(file);
+
+    setSaving(true);
+    const response = await updateProfile(
+      field === "avatar" ? { avatar: file } : { backgroundImage: file },
+    );
+    setSaving(false);
+
+    if (response.error) {
+      if (field === "avatar") {
+        setAvatarPreview(previousImage);
+      } else {
+        setBackgroundImagePreview(previousImage);
+      }
+      toast.error(response.error);
+      return;
+    }
+
+    if (!response.data?.user) {
+      if (field === "avatar") {
+        setAvatarPreview(previousImage);
+      } else {
+        setBackgroundImagePreview(previousImage);
+      }
+      toast.error("The image could not be saved. Please try again.");
+      return;
+    }
+
+    const user = response.data.user;
+    setProfile((current) => (current ? { ...current, ...user } : user));
+    if (field === "avatar") {
+      setAvatarPreview(user.avatar || "");
+    } else {
+      setBackgroundImagePreview(user.backgroundImage || "");
+    }
+    toast.success(field === "avatar" ? "Profile photo saved." : "Banner saved.");
+  };
+
+  const deleteProfileImage = async (field: "avatar" | "backgroundImage") => {
+    setSaving(true);
+    const response = await deleteProfileImageRequest(field);
+    setSaving(false);
+    setImageMenu(null);
+
+    if (response.error) {
+      toast.error(response.error);
+      return;
+    }
+
+    if (!response.data?.user) {
+      toast.error("The image could not be deleted. Please try again.");
+      return;
+    }
+
+    setProfile((current) =>
+      current ? { ...current, ...response.data.user } : response.data.user,
+    );
+    if (field === "avatar") {
+      setAvatarPreview("");
+    } else {
+      setBackgroundImagePreview("");
+    }
+    toast.success(field === "avatar" ? "Profile photo deleted." : "Banner deleted.");
   };
 
   if (loading) {
@@ -259,17 +364,36 @@ function ProfilePage() {
           className="glass-card border border-white/70 rounded-[28px] overflow-hidden shadow-float"
         >
           {/* Banner */}
-          <div className="relative h-28 md:h-36 gradient-bg">
-            <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,rgba(255,255,255,0.2),transparent_60%)]" />
-            <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_left,rgba(0,0,0,0.1),transparent_60%)]" />
-            {/* Edit banner button */}
-            <button
-              type="button"
-              onClick={openAvatarPicker}
-              className="absolute top-3 right-3 grid h-8 w-8 place-items-center rounded-xl bg-white/20 backdrop-blur-sm text-white hover:bg-white/30 transition"
-            >
-              <Camera className="h-3.5 w-3.5" />
-            </button>
+          <div
+            className="relative h-28 md:h-36 gradient-bg bg-cover bg-center"
+            style={
+              backgroundImagePreview || profile?.backgroundImage
+                ? {
+                    backgroundImage: `url("${backgroundImagePreview || profile?.backgroundImage}")`,
+                  }
+                : undefined
+            }
+          >
+            {!backgroundImagePreview && !profile?.backgroundImage && (
+              <>
+                <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,rgba(255,255,255,0.2),transparent_60%)]" />
+                <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_left,rgba(0,0,0,0.1),transparent_60%)]" />
+              </>
+            )}
+            <div className="absolute right-3 top-3">
+              <button
+                type="button"
+                onClick={() =>
+                  setImageMenu((current) => (current === "banner" ? null : "banner"))
+                }
+                disabled={saving}
+                aria-label="Banner image options"
+                aria-expanded={imageMenu === "banner"}
+                className="grid h-9 w-9 place-items-center rounded-xl border border-slate-200 bg-white text-slate-800 shadow-md transition hover:bg-slate-100 disabled:opacity-50"
+              >
+                <Camera className="h-4 w-4" />
+              </button>
+            </div>
           </div>
 
           {/* Avatar + info */}
@@ -283,13 +407,20 @@ function ProfilePage() {
                   size="3xl"
                   className="ring-4 ring-white shadow-glow"
                 />
-                <button
-                  type="button"
-                  onClick={openAvatarPicker}
-                  className="absolute -bottom-1 -right-1 grid h-8 w-8 place-items-center rounded-xl gradient-bg text-white shadow-soft"
-                >
-                  <Camera className="h-3.5 w-3.5" />
-                </button>
+                <div className="absolute -bottom-1 -right-1">
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setImageMenu((current) => (current === "avatar" ? null : "avatar"))
+                    }
+                    disabled={saving}
+                    aria-label="Profile photo options"
+                    aria-expanded={imageMenu === "avatar"}
+                    className="grid h-8 w-8 place-items-center rounded-xl gradient-bg text-white shadow-soft disabled:opacity-50"
+                  >
+                    <Camera className="h-3.5 w-3.5" />
+                  </button>
+                </div>
               </div>
 
               {/* Name + meta */}
@@ -502,12 +633,66 @@ function ProfilePage() {
           </div>
         </motion.div>
 
+        <Dialog
+          open={imageMenu !== null}
+          onOpenChange={(open) => {
+            if (!open && !saving) setImageMenu(null);
+          }}
+        >
+          <DialogContent className="fixed bottom-0 left-1/2 top-auto grid w-full max-w-none -translate-x-1/2 translate-y-0 gap-5 rounded-t-2xl border-slate-200 bg-white p-5 text-slate-900 shadow-2xl sm:bottom-auto sm:top-1/2 sm:max-w-sm sm:-translate-y-1/2 sm:rounded-2xl">
+            <DialogHeader className="pr-8 text-left">
+              <DialogTitle className="text-lg font-semibold text-slate-900">
+                {imageMenu === "avatar" ? "Profile photo" : "Profile banner"}
+              </DialogTitle>
+              <DialogDescription className="text-sm text-slate-600">
+                Choose an image or remove the current one.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="grid gap-3">
+              <button
+                type="button"
+                onClick={imageMenu === "avatar" ? openAvatarPicker : openBackgroundImagePicker}
+                disabled={saving}
+                className="flex min-h-12 w-full items-center gap-3 rounded-xl border border-slate-200 bg-white px-4 py-3 text-left text-sm font-semibold text-slate-800 shadow-sm transition hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary disabled:opacity-50"
+              >
+                <ImagePlus className="h-5 w-5 shrink-0 text-slate-700" />
+                <span>Choose from gallery</span>
+              </button>
+              <button
+                type="button"
+                onClick={() =>
+                  void deleteProfileImage(
+                    imageMenu === "avatar" ? "avatar" : "backgroundImage",
+                  )
+                }
+                disabled={
+                  saving ||
+                  (imageMenu === "avatar"
+                    ? !avatarPreview && !profile?.avatar
+                    : !backgroundImagePreview && !profile?.backgroundImage)
+                }
+                className="flex min-h-12 w-full items-center gap-3 rounded-xl border border-red-200 bg-white px-4 py-3 text-left text-sm font-semibold text-red-700 shadow-sm transition hover:bg-red-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                <Trash2 className="h-5 w-5 shrink-0" />
+                <span>{saving ? "Please wait…" : "Delete image"}</span>
+              </button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
         <input
           ref={fileInputRef}
           type="file"
           accept="image/*"
           className="hidden"
           onChange={handleAvatarChange}
+        />
+        <input
+          ref={backgroundInputRef}
+          type="file"
+          accept="image/*"
+          className="hidden"
+          onChange={handleBackgroundImageChange}
         />
 
         {/* ── Stats ── */}

@@ -1,6 +1,11 @@
 import User from "../models/User.js";
 import Post from "../models/Post.js";
-import { uploadToCloudinary, deleteFromCloudinary } from "../middleware/upload.js";
+import {
+  uploadToCloudinary,
+  deleteFromCloudinary,
+  deleteFromCloudinaryStrict,
+  getProfileImagePublicIdFromUrl,
+} from "../middleware/upload.js";
 import { getIo } from "../socket/socket.js";
 
 // ── GET /api/users/count ────────────────────────────────────────────────────────
@@ -109,6 +114,9 @@ export const getUserById = async (req, res) => {
 // ── PUT /api/users/profile ────────────────────────────────────────────────────
 // Update the currently logged-in user's profile.
 export const updateProfile = async (req, res) => {
+  let uploadedAvatar = null;
+  let uploadedBackgroundImage = null;
+
   try {
     const { name, bio, year, branch, department, semester } = req.body;
 
@@ -134,32 +142,44 @@ export const updateProfile = async (req, res) => {
       backgroundFile = req.files?.backgroundImage?.[0];
     }
 
-    // Handle avatar upload
+    // Upload replacements before deleting existing assets so a failed upload
+    // cannot break the image URL already saved on the user.
     if (avatarFile) {
-      if (req.user.avatarPublicId) {
-        await deleteFromCloudinary(req.user.avatarPublicId);
-      }
-      const result = await uploadToCloudinary(avatarFile.buffer, "avatars");
-      console.log("Avatar upload result:", result && result.public_id ? result.public_id : result);
-      updateData.avatar = result.secure_url;
-      updateData.avatarPublicId = result.public_id;
+      uploadedAvatar = await uploadToCloudinary(avatarFile.buffer, "avatars");
+      updateData.avatar = uploadedAvatar.secure_url;
+      updateData.avatarPublicId = uploadedAvatar.public_id;
     }
 
-    // Handle background/banner upload
     if (backgroundFile) {
-      if (req.user.backgroundImagePublicId) {
-        await deleteFromCloudinary(req.user.backgroundImagePublicId);
-      }
-      const result = await uploadToCloudinary(backgroundFile.buffer, "backgrounds");
-      console.log("Background upload result:", result && result.public_id ? result.public_id : result);
-      updateData.backgroundImage = result.secure_url;
-      updateData.backgroundImagePublicId = result.public_id;
+      uploadedBackgroundImage = await uploadToCloudinary(
+        backgroundFile.buffer,
+        "backgrounds",
+      );
+      updateData.backgroundImage = uploadedBackgroundImage.secure_url;
+      updateData.backgroundImagePublicId = uploadedBackgroundImage.public_id;
     }
 
     const user = await User.findByIdAndUpdate(req.user._id, updateData, {
       new: true,
       runValidators: true,
     }).select("-password -firebaseUid -avatarPublicId -backgroundImagePublicId");
+
+    if (!user) {
+      if (uploadedAvatar?.public_id) {
+        await deleteFromCloudinary(uploadedAvatar.public_id);
+      }
+      if (uploadedBackgroundImage?.public_id) {
+        await deleteFromCloudinary(uploadedBackgroundImage.public_id);
+      }
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    if (uploadedAvatar && req.user.avatarPublicId) {
+      await deleteFromCloudinary(req.user.avatarPublicId);
+    }
+    if (uploadedBackgroundImage && req.user.backgroundImagePublicId) {
+      await deleteFromCloudinary(req.user.backgroundImagePublicId);
+    }
 
     // Notify connected clients about the updated user so UI can refresh in real-time
     try {
@@ -172,7 +192,65 @@ export const updateProfile = async (req, res) => {
     res.status(200).json({ message: "Profile updated", user });
   } catch (error) {
     console.error("Update profile error:", error);
+    if (uploadedAvatar?.public_id) {
+      await deleteFromCloudinary(uploadedAvatar.public_id);
+    }
+    if (uploadedBackgroundImage?.public_id) {
+      await deleteFromCloudinary(uploadedBackgroundImage.public_id);
+    }
+    if (error.code?.startsWith("CLOUDINARY_")) {
+      return res.status(503).json({ message: error.message });
+    }
     res.status(500).json({ message: "Server error during profile update" });
+  }
+};
+
+export const deleteProfileImage = async (req, res) => {
+  const imageFields = {
+    avatar: { url: "avatar", publicId: "avatarPublicId" },
+    backgroundImage: {
+      url: "backgroundImage",
+      publicId: "backgroundImagePublicId",
+    },
+  };
+  const imageField = imageFields[req.body.imageType];
+
+  if (!imageField) {
+    return res.status(400).json({ message: "Invalid profile image type" });
+  }
+
+  try {
+    const user = await User.findById(req.user._id);
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    const publicId =
+      user[imageField.publicId] ||
+      getProfileImagePublicIdFromUrl(user[imageField.url], req.body.imageType);
+    await deleteFromCloudinaryStrict(publicId);
+    user[imageField.url] = "";
+    user[imageField.publicId] = "";
+    await user.save();
+
+    const safeUser = await User.findById(user._id).select(
+      "-password -firebaseUid -avatarPublicId -backgroundImagePublicId",
+    );
+
+    try {
+      const io = getIo();
+      if (io) io.emit("user_updated", { user: safeUser });
+    } catch (error) {
+      console.warn("Failed to emit user_updated socket event:", error.message || error);
+    }
+
+    res.status(200).json({ message: "Profile image deleted", user: safeUser });
+  } catch (error) {
+    console.error("Delete profile image error:", error);
+    if (error.code?.startsWith("CLOUDINARY_")) {
+      return res.status(503).json({ message: error.message });
+    }
+    res.status(500).json({ message: "Server error deleting profile image" });
   }
 };
 

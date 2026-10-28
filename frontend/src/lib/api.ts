@@ -345,6 +345,15 @@ export async function updateProfile(
   );
 }
 
+export async function deleteProfileImage(
+  imageType: "avatar" | "backgroundImage",
+): Promise<ApiResponse<{ user: UserProfile }>> {
+  return apiRequest<{ user: UserProfile }>("/users/profile/image", {
+    method: "DELETE",
+    body: { imageType },
+  });
+}
+
 export async function getMyProfile(): Promise<
   ApiResponse<{ user: UserProfile; stats: any }>
 > {

@@ -32,7 +32,7 @@ function colorFromName(name: string): string {
 function getInitials(name: string): string {
   const trimmed = name.trim();
   if (!trimmed) return "?";
-  return trimmed[0].toUpperCase();
+  return Array.from(trimmed)[0].toLocaleUpperCase();
 }
 
 const SIZE_MAP = {
@@ -84,7 +84,7 @@ export function UserAvatar({
       className={`${outer} rounded-full ${bg} ${ring} ring-white shadow-sm flex items-center justify-center shrink-0 ${className}`}
       aria-label={name}
     >
-      <span className={`${text} font-bold text-white leading-none ${innerClassName}`}>
+      <span className={`${text} font-bold text-white uppercase leading-none ${innerClassName}`}>
         {initials}
       </span>
     </div>
